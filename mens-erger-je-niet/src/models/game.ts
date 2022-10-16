@@ -22,4 +22,16 @@ export class Game {
       this.players.push(new Player(pawns));
     });
   }
+
+  nextPlayer() {
+    this.currentPlayerIndex++;
+
+    if (this.currentPlayerIndex === 4) {
+      this.currentPlayerIndex = 0;
+    }
+  }
+
+  currentPlayerRollDice() {
+    this.players[this.currentPlayerIndex].rollDice(this.dice);
+  }
 }

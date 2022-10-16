@@ -9,6 +9,11 @@ import { Game } from 'src/models/game';
 export class AppComponent {
   readonly game = new Game();
 
-  onClickRollDice() {
+  onClickBtnRollDice() {
+    this.game.currentPlayerRollDice();
+  }
+
+  onClickBtnNextPlayer() {
+    this.game.nextPlayer();
   }
 }
