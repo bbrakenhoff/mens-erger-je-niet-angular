@@ -48,11 +48,24 @@ describe('Game', () => {
 
   describe('currentPlayerRollDice()', () => {
     it('should let the current player roll the dice', () => {
-      spyOn(game.players[game.currentPlayerIndex], 'rollDice');
+      spyOn(game.players[0], 'rollDice');
       game.currentPlayerRollDice();
       expect(
-        game.players[game.currentPlayerIndex].rollDice
+        game.players[0].rollDice
       ).toHaveBeenCalledWith(game.dice);
+    });
+  });
+
+  describe('determineFirstPlayer()', () => {
+    it('should determine the first player', () => {
+      const diceRollValues = [1, 2, 4, 4, 5, 6, 2, 3];
+      spyOn(game.dice, 'roll').and.returnValues(...diceRollValues);
+      expect(game.isFirstPlayerDetermined).toBeFalse();
+      diceRollValues.forEach(() => {
+        game.currentPlayerRollDice();
+      });
+      expect(game.isFirstPlayerDetermined).toBeTrue();
+      expect(game.currentPlayerIndex).toEqual(1);
     });
   });
 });
