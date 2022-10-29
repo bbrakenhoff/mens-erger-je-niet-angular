@@ -1,6 +1,6 @@
-import { allColors, Color } from './color';
-import { HomeField } from './home-field';
-import { LandingField } from './landing-field';
+import { allColors, Color } from "./color";
+import { HomeField } from "./fields/home-field";
+import { LandingField } from "./fields/landing-field";
 
 export class Board {
   readonly homeFields: Map<Color, HomeField[]> = new Map();

@@ -1,9 +1,9 @@
-import { Board } from './board';
-import { allColors, Color } from './color';
-import { Dice } from './dice';
-import { FirstPlayerDeterminer } from './first-player-determiner';
-import { Pawn } from './pawn';
-import { Player } from './player';
+import { Board } from "./board";
+import { allColors, Color } from "./color";
+import { Dice } from "./dice";
+import { FirstPlayerDeterminer } from "./first-player-determiner";
+import { Pawn } from "./pawn";
+import { Player } from "./player";
 
 export class Game {
   readonly dice = new Dice();
