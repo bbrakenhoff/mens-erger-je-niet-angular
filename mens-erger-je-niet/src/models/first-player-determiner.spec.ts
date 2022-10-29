@@ -1,7 +1,7 @@
 import { FirstPlayerDeterminer } from './first-player-determiner';
 import { Player } from './player';
 
-fdescribe('FirstPlayerDeterminer', () => {
+describe('FirstPlayerDeterminer', () => {
   let players: Player[];
   let firstPlayerDeterminer: FirstPlayerDeterminer;
 

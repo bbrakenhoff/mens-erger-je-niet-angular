@@ -3,7 +3,7 @@ import { FirstPlayerDeterminer } from './first-player-determiner';
 import { Game } from './game';
 import { Pawn } from './pawn';
 
-fdescribe('Game', () => {
+describe('Game', () => {
   let firstPlayerDeterminerSpy: FirstPlayerDeterminer;
 
   let game: Game;
