@@ -1,3 +1,4 @@
+import { Board } from './board';
 import { allColors, Color } from './color';
 import { Dice } from './dice';
 import { FirstPlayerDeterminer } from './first-player-determiner';
@@ -5,8 +6,10 @@ import { Pawn } from './pawn';
 import { Player } from './player';
 
 export class Game {
-  players: Player[] = [];
   readonly dice = new Dice();
+  readonly board = new Board();
+
+  players: Player[] = [];
   currentPlayerIndex = 0;
   isFirstPlayerDetermined = false;
 
@@ -14,6 +17,7 @@ export class Game {
     private readonly firstPlayerDeterminer = new FirstPlayerDeterminer()
   ) {
     this.createPlayers();
+    this.placePawnsOnHomeFields()
   }
 
   private get currentPlayer() {
@@ -28,6 +32,16 @@ export class Game {
       }
 
       this.players.push(new Player(pawns));
+    });
+  }
+
+  private placePawnsOnHomeFields() {
+    const pawnsOfPlayers = this.players.map((player) => player.pawns);
+    pawnsOfPlayers.forEach((pawns) => {
+      this.board.homeFields.get(pawns[0].color)?.forEach((homeField, i) => {
+        homeField.pawn = pawns[i];
+        pawns[i].field = homeField;
+      });
     });
   }
 
@@ -46,7 +60,7 @@ export class Game {
       this.players,
       this.currentPlayerIndex
     );
-    
+
     if (!this.firstPlayerDeterminer.isFirstPlayerAlreadyDetermined()) {
       this.nextPlayer();
     }

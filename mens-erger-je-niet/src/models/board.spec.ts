@@ -1,7 +1,7 @@
 import { Board } from './board';
-import { HomeField } from './home-field';
+import { allColors } from './color';
 
-fdescribe('Board', () => {
+describe('Board', () => {
   let board: Board;
 
   beforeEach(() => {
@@ -9,16 +9,26 @@ fdescribe('Board', () => {
   });
 
   it('should have 4 home fields for each player', () => {
-    expect(board.homeFields.length).toBe(4);
-    board.homeFields.forEach((homeFieldsForPlayer:HomeField[]) => {
-      expect(homeFieldsForPlayer.length).toBe(4)
-    })
+    expect(board.homeFields.size).toBe(4);
+    expect(Array.from(board.homeFields.keys())).toEqual(allColors);
+    board.homeFields.forEach((homeFieldsForPlayer, color) => {
+      expect(homeFieldsForPlayer.length).toBe(4);
+      expect(
+        homeFieldsForPlayer.every((homeField) => homeField.color === color)
+      ).toBeTrue();
+    });
   });
 
   it('should have 4 landing fields for each player', () => {
-    expect(board.landingFields.length).toBe(4);
-    board.landingFields.forEach((landingFieldsForPlayer:HomeField[]) => {
-      expect(landingFieldsForPlayer.length).toBe(4)
-    })
+    expect(board.landingFields.size).toBe(4);
+    expect(Array.from(board.landingFields.keys())).toEqual(allColors);
+    board.landingFields.forEach((landingFieldsForPlayer, color) => {
+      expect(landingFieldsForPlayer.length).toBe(4);
+      expect(
+        landingFieldsForPlayer.every(
+          (landingField) => landingField.color === color
+        )
+      ).toBeTrue();
+    });
   });
 });

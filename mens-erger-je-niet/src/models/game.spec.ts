@@ -34,6 +34,21 @@ describe('Game', () => {
         game.players[3].pawns.every((pawn: Pawn) => pawn.color === Color.Yellow)
       );
     });
+
+    it('should create a board and place pawns on home fields', () => {
+      expect(game.board).toBeDefined();
+      game.board.homeFields.forEach((homeFieldsOfPlayer, color) => {
+        expect(
+          homeFieldsOfPlayer.every(
+            (homeField) =>
+              homeField.color === color &&
+              homeField.pawn !== null &&
+              homeField.pawn.color === color &&
+              homeField.pawn.field === homeField
+          )
+        ).toBeTrue();
+      });
+    });
   });
 
   describe('nextPlayer()', () => {

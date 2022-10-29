@@ -1,10 +1,10 @@
-import { allColors } from './color';
+import { allColors, Color } from './color';
 import { HomeField } from './home-field';
 import { LandingField } from './landing-field';
 
 export class Board {
-  readonly homeFields: HomeField[][] = [];
-  readonly landingFields: LandingField[][] = [];
+  readonly homeFields: Map<Color, HomeField[]> = new Map();
+  readonly landingFields: Map<Color, LandingField[]> = new Map();
 
   constructor() {
     this.createHomeFields();
@@ -17,7 +17,7 @@ export class Board {
       for (let i = 0; i < 4; i++) {
         homeFieldsForPlayer.push(new HomeField(color));
       }
-      this.homeFields.push(homeFieldsForPlayer);
+      this.homeFields.set(color, homeFieldsForPlayer);
     });
   }
 
@@ -27,7 +27,7 @@ export class Board {
       for (let i = 0; i < 4; i++) {
         landingFieldsForPlayer.push(new LandingField(color));
       }
-      this.landingFields.push(landingFieldsForPlayer);
+      this.landingFields.set(color, landingFieldsForPlayer);
     });
   }
 }
