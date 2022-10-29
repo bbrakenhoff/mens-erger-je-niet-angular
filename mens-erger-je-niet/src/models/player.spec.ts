@@ -13,7 +13,7 @@ describe('Player', () => {
       const dice: Dice = new Dice();
       spyOn(dice, 'roll').and.returnValue(3);
       player.rollDice(dice);
-      expect(player.latestDiceRoll).toEqual(3);
+      expect(player.latestDiceRoll).toBe(3);
     });
   });
 });

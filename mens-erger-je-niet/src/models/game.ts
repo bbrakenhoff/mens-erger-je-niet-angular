@@ -42,53 +42,13 @@ export class Game {
   currentPlayerRollDice() {
     this.currentPlayer.rollDice(this.dice);
 
-    if (
-      this.firstPlayerDeterminer.determineFirstPlayer(
-        this.players,
-        this.currentPlayerIndex
-      ) === -1
-    ) {
+    this.firstPlayerDeterminer.determineFirstPlayer(
+      this.players,
+      this.currentPlayerIndex
+    );
+    
+    if (!this.firstPlayerDeterminer.isFirstPlayerAlreadyDetermined()) {
       this.nextPlayer();
     }
-  }
-
-  private canDetermineFirstPlayer() {
-    return (
-      !this.isFirstPlayerDetermined &&
-      this.currentPlayerIndex === 3 &&
-      this.isHighestDiceRollOnlyOnce()
-    );
-  }
-
-  private highestDiceRoll = 0;
-  private diceRollsOfPlayers: number[] = [];
-
-  private isHighestDiceRollOnlyOnce() {
-    this.diceRollsOfPlayers = this.players.map(
-      (player) => player.latestDiceRoll
-    );
-
-    this.highestDiceRoll = Math.max(...this.diceRollsOfPlayers);
-    // console.log(
-    //   `Bijoya game.ts[ln:64] ${this.diceRollsOfPlayers} > ${this.highestDiceRoll}`
-    // );
-
-    return (
-      this.diceRollsOfPlayers.filter(
-        (diceRoll) => diceRoll === this.highestDiceRoll
-      ).length === 1
-    );
-  }
-
-  private findFirstPlayerIndex() {
-    this.isFirstPlayerDetermined = true;
-    this.currentPlayerIndex = this.diceRollsOfPlayers.indexOf(
-      this.highestDiceRoll
-    );
-    console.log(
-      `Bijoya game.ts[ln:75] () ${this.diceRollsOfPlayers.indexOf(
-        this.highestDiceRoll
-      )} ${this.currentPlayerIndex}`
-    );
   }
 }

@@ -15,21 +15,21 @@ fdescribe('Game', () => {
 
   describe('constructor()', () => {
     it('should create 4 players with 4 pawns each', () => {
-      expect(game.players.length).toEqual(4);
+      expect(game.players.length).toBe(4);
 
-      expect(game.players[0].pawns.length).toEqual(4);
+      expect(game.players[0].pawns.length).toBe(4);
       expect(
         game.players[0].pawns.every((pawn: Pawn) => pawn.color === Color.Black)
       );
-      expect(game.players[1].pawns.length).toEqual(4);
+      expect(game.players[1].pawns.length).toBe(4);
       expect(
         game.players[1].pawns.every((pawn: Pawn) => pawn.color === Color.Green)
       );
-      expect(game.players[2].pawns.length).toEqual(4);
+      expect(game.players[2].pawns.length).toBe(4);
       expect(
         game.players[2].pawns.every((pawn: Pawn) => pawn.color === Color.Red)
       );
-      expect(game.players[3].pawns.length).toEqual(4);
+      expect(game.players[3].pawns.length).toBe(4);
       expect(
         game.players[3].pawns.every((pawn: Pawn) => pawn.color === Color.Yellow)
       );
@@ -38,15 +38,15 @@ fdescribe('Game', () => {
 
   describe('nextPlayer()', () => {
     it('should update current player index', () => {
-      expect(game.currentPlayerIndex).toEqual(0);
+      expect(game.currentPlayerIndex).toBe(0);
       game.nextPlayer();
-      expect(game.currentPlayerIndex).toEqual(1);
+      expect(game.currentPlayerIndex).toBe(1);
       game.nextPlayer();
-      expect(game.currentPlayerIndex).toEqual(2);
+      expect(game.currentPlayerIndex).toBe(2);
       game.nextPlayer();
-      expect(game.currentPlayerIndex).toEqual(3);
+      expect(game.currentPlayerIndex).toBe(3);
       game.nextPlayer();
-      expect(game.currentPlayerIndex).toEqual(0);
+      expect(game.currentPlayerIndex).toBe(0);
     });
   });
 
@@ -67,15 +67,16 @@ fdescribe('Game', () => {
 
     it('should give the turn to the next player when first player not yet determined', () => {
       game.currentPlayerRollDice();
-      expect(game.currentPlayerIndex).toEqual(1);
+      expect(game.currentPlayerIndex).toBe(1);
     });
 
-    it('should not give the turn to the next player when first player determined', () => {
-      spyOn(firstPlayerDeterminerSpy, 'determineFirstPlayer').and.returnValue(
-        0
-      );
+    it('should not give the turn to the next player when first player is already determined', () => {
+      spyOn(
+        firstPlayerDeterminerSpy,
+        'isFirstPlayerAlreadyDetermined'
+      ).and.returnValue(true);
       game.currentPlayerRollDice();
-      expect(game.currentPlayerIndex).toEqual(0);
+      expect(game.currentPlayerIndex).toBe(0);
     });
   });
 });

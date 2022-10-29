@@ -26,7 +26,7 @@ export class FirstPlayerDeterminer {
     );
   }
 
-  private isFirstPlayerAlreadyDetermined() {
+  isFirstPlayerAlreadyDetermined() {
     return this.firstPlayerIndex > -1;
   }
 
