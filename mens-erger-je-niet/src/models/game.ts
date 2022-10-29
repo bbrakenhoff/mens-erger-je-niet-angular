@@ -1,5 +1,6 @@
 import { allColors, Color } from './color';
 import { Dice } from './dice';
+import { FirstPlayerDeterminer } from './first-player-determiner';
 import { Pawn } from './pawn';
 import { Player } from './player';
 
@@ -9,7 +10,9 @@ export class Game {
   currentPlayerIndex = 0;
   isFirstPlayerDetermined = false;
 
-  constructor() {
+  constructor(
+    private readonly firstPlayerDeterminer = new FirstPlayerDeterminer()
+  ) {
     this.createPlayers();
   }
 
@@ -39,9 +42,12 @@ export class Game {
   currentPlayerRollDice() {
     this.currentPlayer.rollDice(this.dice);
 
-    if (this.canDetermineFirstPlayer()) {
-      this.findFirstPlayerIndex();
-    } else {
+    if (
+      this.firstPlayerDeterminer.determineFirstPlayer(
+        this.players,
+        this.currentPlayerIndex
+      ) === -1
+    ) {
       this.nextPlayer();
     }
   }
@@ -59,7 +65,7 @@ export class Game {
 
   private isHighestDiceRollOnlyOnce() {
     this.diceRollsOfPlayers = this.players.map(
-      (player) => player.numberOfEyesRolledWithDice
+      (player) => player.latestDiceRoll
     );
 
     this.highestDiceRoll = Math.max(...this.diceRollsOfPlayers);

@@ -2,15 +2,15 @@ import { Dice } from './dice';
 import { Pawn } from './pawn';
 
 export class Player {
-  private _numberOfEyesRolledWithDice: number = 0;
+  private _latestDiceRoll: number = 0;
 
   constructor(readonly pawns: Pawn[]) {}
 
-  get numberOfEyesRolledWithDice() {
-    return this._numberOfEyesRolledWithDice;
+  get latestDiceRoll() {
+    return this._latestDiceRoll;
   }
 
   rollDice(dice: Dice) {
-    this._numberOfEyesRolledWithDice = dice.roll();
+    this._latestDiceRoll = dice.roll();
   }
 }

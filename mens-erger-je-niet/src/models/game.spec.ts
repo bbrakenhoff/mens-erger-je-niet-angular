@@ -1,12 +1,16 @@
 import { allColors, Color } from './color';
+import { FirstPlayerDeterminer } from './first-player-determiner';
 import { Game } from './game';
 import { Pawn } from './pawn';
 
-describe('Game', () => {
+fdescribe('Game', () => {
+  let firstPlayerDeterminerSpy: FirstPlayerDeterminer;
+
   let game: Game;
 
   beforeEach(() => {
-    game = new Game();
+    firstPlayerDeterminerSpy = new FirstPlayerDeterminer();
+    game = new Game(firstPlayerDeterminerSpy);
   });
 
   describe('constructor()', () => {
@@ -50,22 +54,28 @@ describe('Game', () => {
     it('should let the current player roll the dice', () => {
       spyOn(game.players[0], 'rollDice');
       game.currentPlayerRollDice();
-      expect(
-        game.players[0].rollDice
-      ).toHaveBeenCalledWith(game.dice);
+      expect(game.players[0].rollDice).toHaveBeenCalledWith(game.dice);
     });
-  });
 
-  describe('determineFirstPlayer()', () => {
     it('should determine the first player', () => {
-      const diceRollValues = [1, 2, 4, 4, 5, 6, 2, 3];
-      spyOn(game.dice, 'roll').and.returnValues(...diceRollValues);
-      expect(game.isFirstPlayerDetermined).toBeFalse();
-      diceRollValues.forEach(() => {
-        game.currentPlayerRollDice();
-      });
-      expect(game.isFirstPlayerDetermined).toBeTrue();
+      spyOn(firstPlayerDeterminerSpy, 'determineFirstPlayer');
+      game.currentPlayerRollDice();
+      expect(
+        firstPlayerDeterminerSpy.determineFirstPlayer
+      ).toHaveBeenCalledWith(game.players, 0);
+    });
+
+    it('should give the turn to the next player when first player not yet determined', () => {
+      game.currentPlayerRollDice();
       expect(game.currentPlayerIndex).toEqual(1);
+    });
+
+    it('should not give the turn to the next player when first player determined', () => {
+      spyOn(firstPlayerDeterminerSpy, 'determineFirstPlayer').and.returnValue(
+        0
+      );
+      game.currentPlayerRollDice();
+      expect(game.currentPlayerIndex).toEqual(0);
     });
   });
 });
