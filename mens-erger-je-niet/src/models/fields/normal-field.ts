@@ -8,7 +8,7 @@ export class NormalField extends Field {
   previous!: NormalField | StartField;
   landingField: LandingField | undefined;
 
-  constructor(color: Color) {
+  constructor(color: Color,readonly index:number) {
     super(color);
   }
 }

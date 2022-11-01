@@ -1,0 +1,9 @@
+<div class="field" *ngIf="field" [ngClass]="getFieldClass()">
+  <div
+    *ngIf="field?.pawn"
+    [ngClass]="getColorClass(field.pawn?.color)"
+    class="pawn"
+  ></div>
+  <span>{{ index }}</span>
+</div>
+<div class="placeholder-field" *ngIf="!field"></div>

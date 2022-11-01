@@ -35,19 +35,23 @@ describe('Game', () => {
       );
     });
 
-    it('should create a board and place pawns on home fields', () => {
-      expect(game.board).toBeDefined();
-      game.board.homeFields.forEach((homeFieldsOfPlayer, color) => {
-        expect(
-          homeFieldsOfPlayer.every(
-            (homeField) =>
-              homeField.color === color &&
-              homeField.pawn !== null &&
-              homeField.pawn.color === color &&
-              homeField.pawn.field === homeField
-          )
-        ).toBeTrue();
+    it('should let players put pawns on home fields', () => {
+      game.players.forEach((player) => {
+        player.pawns.forEach((pawn, i) => {
+          const homeField = game.board.homeFields.get(pawn.color)![i];
+          expect(pawn.field).toBeDefined();
+          expect(pawn.field).toBe(homeField);
+          expect(homeField.pawn).toBe(pawn);
+          expect(homeField.pawn).toBeDefined();
+        });
       });
+    });
+  });
+
+  describe('get currentPlayer()', () => {
+    it('should return the player at the current player index', () => {
+      game.currentPlayerIndex = 1;
+      expect(game.currentPlayer).toBe(game.players[1]);
     });
   });
 
@@ -85,13 +89,16 @@ describe('Game', () => {
       expect(game.currentPlayerIndex).toBe(1);
     });
 
-    it('should not give the turn to the next player when first player is already determined', () => {
+    it('should give the turn to player with highest dice roll when first player determined', () => {
       spyOn(
         firstPlayerDeterminerSpy,
         'isFirstPlayerAlreadyDetermined'
       ).and.returnValue(true);
+      spyOn(firstPlayerDeterminerSpy, 'determineFirstPlayer').and.returnValue(
+        1
+      );
       game.currentPlayerRollDice();
-      expect(game.currentPlayerIndex).toBe(0);
+      expect(game.currentPlayerIndex).toBe(1);
     });
   });
 });

@@ -1,7 +1,7 @@
 import { Board } from './board';
 import { allColors, Color } from './color';
 
-fdescribe('Board', () => {
+describe('Board', () => {
   let board: Board;
 
   beforeEach(() => {
@@ -100,9 +100,9 @@ fdescribe('Board', () => {
           board.startFields.get(Color.Black)!
         );
         expect(board.startFields.get(Color.Black)!.previous).toBe(
-          board.normalFields.get(Color.Green)![6]
+          board.normalFields.get(Color.Green)![8]
         );
-        expect(board.normalFields.get(Color.Green)![6].next).toBe(
+        expect(board.normalFields.get(Color.Green)![8].next).toBe(
           board.startFields.get(Color.Black)!
         );
       });
@@ -115,9 +115,9 @@ fdescribe('Board', () => {
           board.startFields.get(Color.Green)!
         );
         expect(board.startFields.get(Color.Green)!.previous).toBe(
-          board.normalFields.get(Color.Red)![6]
+          board.normalFields.get(Color.Red)![8]
         );
-        expect(board.normalFields.get(Color.Red)![6].next).toBe(
+        expect(board.normalFields.get(Color.Red)![8].next).toBe(
           board.startFields.get(Color.Green)!
         );
       });
@@ -130,9 +130,9 @@ fdescribe('Board', () => {
           board.startFields.get(Color.Red)!
         );
         expect(board.startFields.get(Color.Red)!.previous).toBe(
-          board.normalFields.get(Color.Yellow)![6]
+          board.normalFields.get(Color.Yellow)![8]
         );
-        expect(board.normalFields.get(Color.Yellow)![6].next).toBe(
+        expect(board.normalFields.get(Color.Yellow)![8].next).toBe(
           board.startFields.get(Color.Red)!
         );
       });
@@ -145,9 +145,9 @@ fdescribe('Board', () => {
           board.startFields.get(Color.Yellow)!
         );
         expect(board.startFields.get(Color.Yellow)!.previous).toBe(
-          board.normalFields.get(Color.Black)![6]
+          board.normalFields.get(Color.Black)![8]
         );
-        expect(board.normalFields.get(Color.Black)![6].next).toBe(
+        expect(board.normalFields.get(Color.Black)![8].next).toBe(
           board.startFields.get(Color.Yellow)!
         );
       });
@@ -176,8 +176,19 @@ fdescribe('Board', () => {
         expect(normalFieldsForPlayer[5].previous).toBe(
           normalFieldsForPlayer[4]
         );
+
+        expect(normalFieldsForPlayer[6].next).toBe(normalFieldsForPlayer[7]);
         expect(normalFieldsForPlayer[6].previous).toBe(
           normalFieldsForPlayer[5]
+        );
+
+        expect(normalFieldsForPlayer[7].next).toBe(normalFieldsForPlayer[8]);
+        expect(normalFieldsForPlayer[7].previous).toBe(
+          normalFieldsForPlayer[6]
+        );
+
+        expect(normalFieldsForPlayer[8].previous).toBe(
+          normalFieldsForPlayer[7]
         );
       });
     });

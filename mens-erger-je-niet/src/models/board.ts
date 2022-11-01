@@ -81,8 +81,8 @@ export class Board {
   private createNormalFields() {
     allColors.forEach((color) => {
       const normalFieldsForPlayer: NormalField[] = [];
-      for (let i = 0; i < 7; i++) {
-        normalFieldsForPlayer.push(new NormalField(color));
+      for (let i = 0; i < 9; i++) {
+        normalFieldsForPlayer.push(new NormalField(color,i));
       }
       this.normalFields.set(color, normalFieldsForPlayer);
     });
@@ -114,8 +114,8 @@ export class Board {
     this.startFields.forEach((startField, color) => {
       startField.next = this.normalFields.get(color)![0];
       this.normalFields.get(color)![0].previous = startField;
-      startField.previous = this.normalFields.get(Board.nextColor(color))![6];
-      this.normalFields.get(Board.nextColor(color))![6].next = startField;
+      startField.previous = this.normalFields.get(Board.nextColor(color))![8];
+      this.normalFields.get(Board.nextColor(color))![8].next = startField;
     });
   }
 
