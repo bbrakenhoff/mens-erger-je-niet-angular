@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Board } from 'models/board';
 
 import { BoardComponent } from './board.component';
 
@@ -14,6 +15,7 @@ describe('BoardComponent', () => {
 
     fixture = TestBed.createComponent(BoardComponent);
     component = fixture.componentInstance;
+    component.board=new Board()
     fixture.detectChanges();
   });
 

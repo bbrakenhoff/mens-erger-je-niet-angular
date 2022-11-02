@@ -1,4 +1,5 @@
 import { allColors, Color } from './color';
+import { StartField } from './fields/start-field';
 import { FirstPlayerDeterminer } from './first-player-determiner';
 import { Game } from './game';
 import { Pawn } from './pawn';
@@ -99,6 +100,38 @@ describe('Game', () => {
       );
       game.currentPlayerRollDice();
       expect(game.currentPlayerIndex).toBe(1);
+    });
+
+    it('should let player put a pawn on start field when dice roll is 6', () => {
+      spyOn(
+        firstPlayerDeterminerSpy,
+        'isFirstPlayerAlreadyDetermined'
+      ).and.returnValue(true);
+      spyOn(firstPlayerDeterminerSpy, 'determineFirstPlayer').and.returnValue(
+        0
+      );
+      spyOnProperty(game.currentPlayer, 'latestDiceRoll').and.returnValue(6);
+      spyOn(game.currentPlayer.pawns[0], 'moveToNextField');
+
+      game.currentPlayerRollDice();
+
+      expect(game.players[0].pawns[0].moveToNextField).toHaveBeenCalled();
+    });
+
+    it('should not let player put a pawn on start field when dice roll is not 6', () => {
+      spyOn(
+        firstPlayerDeterminerSpy,
+        'isFirstPlayerAlreadyDetermined'
+      ).and.returnValue(true);
+      spyOn(firstPlayerDeterminerSpy, 'determineFirstPlayer').and.returnValue(
+        0
+      );
+      spyOnProperty(game.currentPlayer, 'latestDiceRoll').and.returnValue(5);
+      spyOn(game.currentPlayer.pawns[0], 'moveToNextField');
+
+      game.currentPlayerRollDice();
+
+      expect(game.players[0].pawns[0].moveToNextField).not.toHaveBeenCalled();
     });
   });
 });

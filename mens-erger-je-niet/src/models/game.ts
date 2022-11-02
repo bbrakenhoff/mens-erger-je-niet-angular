@@ -1,6 +1,7 @@
 import { Board } from './board';
 import { allColors, Color } from './color';
 import { Dice } from './dice';
+import { HomeField } from './fields/home-field';
 import { FirstPlayerDeterminer } from './first-player-determiner';
 import { Pawn } from './pawn';
 import { Player } from './player';
@@ -61,10 +62,21 @@ export class Game {
       this.currentPlayerIndex
     );
 
-    if (!this.firstPlayerDeterminer.isFirstPlayerAlreadyDetermined()) {
-      this.nextPlayer();
-    } else {
+    if (this.firstPlayerDeterminer.isFirstPlayerAlreadyDetermined()) {
       this.currentPlayerIndex = firstPlayerIndex;
+
+      if (this.currentPlayer.latestDiceRoll === 6) {
+        this.currentPlayerMovePawn();
+      }
+    } else {
+      this.nextPlayer();
     }
+  }
+
+  private currentPlayerMovePawn() {
+    const pawnOnHomeField = this.currentPlayer.pawns.find(
+      (pawn) => pawn.field instanceof HomeField
+    );
+    pawnOnHomeField?.moveToNextField();
   }
 }

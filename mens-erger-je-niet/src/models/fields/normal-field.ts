@@ -1,14 +1,14 @@
 import { Color } from 'models/color';
+import { Pawn } from 'models/pawn';
 import { Field } from './field';
 import { LandingField } from './landing-field';
 import { StartField } from './start-field';
 
-export class NormalField extends Field {
+export class NormalField implements Field {
   next!: NormalField | StartField;
   previous!: NormalField | StartField;
   landingField: LandingField | undefined;
+  pawn?: Pawn;
 
-  constructor(color: Color,readonly index:number) {
-    super(color);
-  }
+  constructor(readonly color: Color, readonly index: number) {}
 }
