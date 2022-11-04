@@ -57,6 +57,10 @@ export class Game {
   currentPlayerRollDice() {
     this.currentPlayer.rollDice(this.dice);
 
+    this.handleRulesFollowingDiceRoll();
+  }
+
+  private handleRulesFollowingDiceRoll() {
     const firstPlayerIndex = this.firstPlayerDeterminer.determineFirstPlayer(
       this.players,
       this.currentPlayerIndex
@@ -67,6 +71,7 @@ export class Game {
 
       if (this.currentPlayer.latestDiceRoll === 6) {
         this.currentPlayerMovePawn();
+        this.nextPlayer()
       }
     } else {
       this.nextPlayer();

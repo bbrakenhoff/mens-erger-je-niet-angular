@@ -102,7 +102,7 @@ describe('Game', () => {
       expect(game.currentPlayerIndex).toBe(1);
     });
 
-    it('should let player put a pawn on start field when dice roll is 6', () => {
+    it('should let player put a pawn on start field when dice roll is 6 and move to next player', () => {
       spyOn(
         firstPlayerDeterminerSpy,
         'isFirstPlayerAlreadyDetermined'
@@ -116,6 +116,7 @@ describe('Game', () => {
       game.currentPlayerRollDice();
 
       expect(game.players[0].pawns[0].moveToNextField).toHaveBeenCalled();
+      expect(game.currentPlayerIndex).toBe(1);
     });
 
     it('should not let player put a pawn on start field when dice roll is not 6', () => {
@@ -132,6 +133,7 @@ describe('Game', () => {
       game.currentPlayerRollDice();
 
       expect(game.players[0].pawns[0].moveToNextField).not.toHaveBeenCalled();
+      expect(game.currentPlayerIndex).toBe(0);
     });
   });
 });
