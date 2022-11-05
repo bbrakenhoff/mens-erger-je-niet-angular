@@ -22,9 +22,12 @@
           <li
             class="list-group-item"
             *ngFor="let player of game.players; let i = index"
-            [ngClass]="{ 'text-primary': i === game.currentPlayerIndex }"
+            [ngClass]="{ 'text-bg-light': i === game.currentPlayerIndex }"
           >
-            Player {{ i + 1 }} - latest dice roll {{ player.latestDiceRoll }}
+            <span [ngClass]="getColorClass(player.pawns[0].color)">
+              Player {{ i + 1 }}</span
+            >
+            latest dice roll {{ player.latestDiceRoll }}
           </li>
         </ul>
       </div>

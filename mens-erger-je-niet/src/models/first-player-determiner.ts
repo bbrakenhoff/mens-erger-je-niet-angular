@@ -1,21 +1,23 @@
 import { Player } from './player';
 
 export class FirstPlayerDeterminer {
-  private firstPlayerIndex = -1;
+  private _firstPlayerIndex = -1;
+  public get firstPlayerIndex(): number {
+    return this._firstPlayerIndex;
+  }
 
   public determineFirstPlayer(
     players: Player[],
     currentPlayerIndex: number
-  ): number {
+  ): void {
     const diceRollsOfPlayers = this.getDiceRollsOfPlayers(players);
     if (
       this.isAbleToDetermineFirstPlayer(diceRollsOfPlayers, currentPlayerIndex)
     ) {
-      this.firstPlayerIndex = diceRollsOfPlayers.indexOf(
+      this._firstPlayerIndex = diceRollsOfPlayers.indexOf(
         this.getHighestDiceRollBetweenPlayers(diceRollsOfPlayers)
       );
     }
-    return this.firstPlayerIndex;
   }
 
   private isAbleToDetermineFirstPlayer(
@@ -29,7 +31,7 @@ export class FirstPlayerDeterminer {
     );
   }
 
-  private isFirstPlayerAlreadyDetermined(): boolean {
+  public isFirstPlayerAlreadyDetermined(): boolean {
     return this.firstPlayerIndex > -1;
   }
 

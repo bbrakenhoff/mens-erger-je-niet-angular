@@ -4,18 +4,6 @@ import { LandingField } from './fields/landing-field';
 import { NormalField } from './fields/normal-field';
 import { StartField } from './fields/start-field';
 
-// HH..nnS..HH
-// HH..nLn..HH
-// ....nLn....
-// ....nLn....
-// SnnnnLnnnnn
-// nLLLL.LLLLn
-// nnnnnLnnnnS
-// ....nLn....
-// ....nLn....
-// HH..nLn..HH
-// HH..Snn..HH
-
 export class Board {
   public readonly homeFields = new Map<Color, HomeField[]>();
   public readonly landingFields = new Map<Color, LandingField[]>();

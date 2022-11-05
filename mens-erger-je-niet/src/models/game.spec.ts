@@ -1,5 +1,5 @@
-import { allColors, Color } from './color';
-import { StartField } from './fields/start-field';
+import { Color } from './color';
+import { HomeField } from './fields/home-field';
 import { FirstPlayerDeterminer } from './first-player-determiner';
 import { Game } from './game';
 import { Pawn } from './pawn';
@@ -39,11 +39,13 @@ describe('Game', () => {
     it('should let players put pawns on home fields', () => {
       game.players.forEach((player) => {
         player.pawns.forEach((pawn, i) => {
-          const homeField = game.board.homeFields.get(pawn.color)![i];
+          const homeField: HomeField = game.board.homeFields.get(pawn.color)?.[
+            i
+          ] as HomeField;
           expect(pawn.field).toBeDefined();
           expect(pawn.field).toBe(homeField);
-          expect(homeField.pawn).toBe(pawn);
-          expect(homeField.pawn).toBeDefined();
+          expect(homeField?.pawn).toBe(pawn);
+          expect(homeField?.pawn).toBeDefined();
         });
       });
     });
@@ -95,28 +97,30 @@ describe('Game', () => {
         firstPlayerDeterminerSpy,
         'isFirstPlayerAlreadyDetermined'
       ).and.returnValue(true);
-      spyOn(firstPlayerDeterminerSpy, 'determineFirstPlayer').and.returnValue(
-        1
-      );
+      spyOnProperty(
+        firstPlayerDeterminerSpy,
+        'firstPlayerIndex'
+      ).and.returnValue(1);
       game.currentPlayerRollDice();
       expect(game.currentPlayerIndex).toBe(1);
     });
 
-    it('should let player put a pawn on start field when dice roll is 6 and move to next player', () => {
+    it('should let player put a pawn on start field when dice roll is 6', () => {
       spyOn(
         firstPlayerDeterminerSpy,
         'isFirstPlayerAlreadyDetermined'
       ).and.returnValue(true);
-      spyOn(firstPlayerDeterminerSpy, 'determineFirstPlayer').and.returnValue(
-        0
-      );
+      spyOnProperty(
+        firstPlayerDeterminerSpy,
+        'firstPlayerIndex'
+      ).and.returnValue(0);
       spyOnProperty(game.currentPlayer, 'latestDiceRoll').and.returnValue(6);
       spyOn(game.currentPlayer.pawns[0], 'moveToNextField');
 
       game.currentPlayerRollDice();
+      game.currentPlayerRollDice();
 
       expect(game.players[0].pawns[0].moveToNextField).toHaveBeenCalled();
-      expect(game.currentPlayerIndex).toBe(1);
     });
 
     it('should not let player put a pawn on start field when dice roll is not 6', () => {
@@ -124,9 +128,10 @@ describe('Game', () => {
         firstPlayerDeterminerSpy,
         'isFirstPlayerAlreadyDetermined'
       ).and.returnValue(true);
-      spyOn(firstPlayerDeterminerSpy, 'determineFirstPlayer').and.returnValue(
-        0
-      );
+      spyOnProperty(
+        firstPlayerDeterminerSpy,
+        'firstPlayerIndex'
+      ).and.returnValue(0);
       spyOnProperty(game.currentPlayer, 'latestDiceRoll').and.returnValue(5);
       spyOn(game.currentPlayer.pawns[0], 'moveToNextField');
 

@@ -5,7 +5,10 @@ describe('FirstPlayerDeterminer', () => {
   let players: Player[];
   let firstPlayerDeterminer: FirstPlayerDeterminer;
 
-  const spyOnPlayer = (playerIndex: number, ...diceRolls: number[]) => {
+  const spyOnPlayer = (
+    playerIndex: number,
+    ...diceRolls: number[]
+  ): jasmine.Spy<(this: Player) => number> => {
     return spyOnProperty(
       players[playerIndex],
       'latestDiceRoll'
@@ -59,7 +62,8 @@ describe('FirstPlayerDeterminer', () => {
       spyOnPlayer(0, 3);
       spyOnPlayer(1, 4);
       spyOnPlayer(2, 5);
-      expect(firstPlayerDeterminer.determineFirstPlayer(players, 2)).toBe(-1);
+      firstPlayerDeterminer.determineFirstPlayer(players, 2);
+      expect(firstPlayerDeterminer.firstPlayerIndex).toBe(-1);
     });
 
     it('should return false when first player not determined and multiple players have the highest dice roll', () => {
@@ -67,7 +71,8 @@ describe('FirstPlayerDeterminer', () => {
       spyOnPlayer(1, 4);
       spyOnPlayer(2, 5);
       spyOnPlayer(3, 5);
-      expect(firstPlayerDeterminer.determineFirstPlayer(players, 2)).toBe(-1);
+      firstPlayerDeterminer.determineFirstPlayer(players, 2);
+      expect(firstPlayerDeterminer.firstPlayerIndex).toBe(-1);
     });
 
     it('should return true when first player not determined yet and all players have rolled the dice and the highest roll of the dice has only been rolled once', () => {
@@ -75,7 +80,8 @@ describe('FirstPlayerDeterminer', () => {
       spyOnPlayer(1, 4, 4);
       spyOnPlayer(2, 5, 5);
       spyOnPlayer(3, 6, 6);
-      expect(firstPlayerDeterminer.determineFirstPlayer(players, 3)).toBe(3);
+      firstPlayerDeterminer.determineFirstPlayer(players, 3);
+      expect(firstPlayerDeterminer.firstPlayerIndex).toBe(3);
     });
 
     it('should return the index of the first player when first player already determined', () => {
@@ -84,8 +90,10 @@ describe('FirstPlayerDeterminer', () => {
       spyOnPlayer(2, 5, 2);
       spyOnPlayer(3, 6, 1);
 
-      expect(firstPlayerDeterminer.determineFirstPlayer(players, 3)).toBe(3);
-      expect(firstPlayerDeterminer.determineFirstPlayer(players, 3)).toBe(3);
+      firstPlayerDeterminer.determineFirstPlayer(players, 3);
+      expect(firstPlayerDeterminer.firstPlayerIndex).toBe(3);
+      firstPlayerDeterminer.determineFirstPlayer(players, 3);
+      expect(firstPlayerDeterminer.firstPlayerIndex).toBe(3);
     });
   });
 });

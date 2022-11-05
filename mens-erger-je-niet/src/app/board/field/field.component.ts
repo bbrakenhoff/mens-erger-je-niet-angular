@@ -15,10 +15,10 @@ export class FieldComponent {
   @Input()
   public field?: Field;
 
-  public get index(): number {
+  public get index(): string {
     return this.field instanceof NormalField
-      ? (this.field as NormalField).index
-      : -1;
+      ? `${(this.field as NormalField).index}`
+      : '';
   }
 
   public getFieldClass(): string {

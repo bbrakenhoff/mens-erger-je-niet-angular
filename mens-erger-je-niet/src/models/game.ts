@@ -1,4 +1,3 @@
-import { BehaviorSubject, Subject } from 'rxjs';
 import { Board } from './board';
 import { allColors, Color } from './color';
 import { Dice } from './dice';
@@ -8,40 +7,25 @@ import { Pawn } from './pawn';
 import { Player } from './player';
 
 export class Game {
-  readonly dice = new Dice();
-  readonly board = new Board();
+  public readonly dice = new Dice();
+  public readonly board = new Board();
 
-  private readonly firstPlayerDeterminedSubject = new BehaviorSubject<boolean>(
-    false
-  );
-  private readonly currentPlayerRolledDice = new BehaviorSubject<boolean>(
-    false
-  );
+  public players: Player[] = [];
+  public currentPlayerIndex = 0;
+  private gameStarted = false;
 
-  players: Player[] = [];
-  currentPlayerIndex = 0;
-  isFirstPlayerDetermined = false;
-
-  constructor(
+  public constructor(
     private readonly firstPlayerDeterminer = new FirstPlayerDeterminer()
   ) {
     this.createPlayers();
     this.placePawnsOnHomeFields();
-
-    this.firstPlayerDeterminedSubject.subscribe({
-      next: (firstPlayerDetermined) =>
-        this.firstPlayerDeterminer.determineFirstPlayer(
-          this.players,
-          this.currentPlayerIndex
-        ),
-    });
   }
 
-  get currentPlayer() {
+  public get currentPlayer(): Player {
     return this.players[this.currentPlayerIndex];
   }
 
-  private createPlayers() {
+  private createPlayers(): void {
     allColors.forEach((color: Color) => {
       const pawns: Pawn[] = [];
       for (let i = 0; i < 4; i++) {
@@ -52,7 +36,7 @@ export class Game {
     });
   }
 
-  private placePawnsOnHomeFields() {
+  private placePawnsOnHomeFields(): void {
     const pawnsOfPlayers = this.players.map((player) => player.pawns);
     pawnsOfPlayers.forEach((pawns) => {
       this.board.homeFields.get(pawns[0].color)?.forEach((homeField, i) => {
@@ -62,39 +46,46 @@ export class Game {
     });
   }
 
-  nextPlayer() {
+  public nextPlayer(): void {
     this.currentPlayerIndex++;
 
     if (this.currentPlayerIndex === 4) {
       this.currentPlayerIndex = 0;
     }
   }
-
-  currentPlayerRollDice() {
-    this.currentPlayer.rollDice(this.dice);
-
-    this.handleRulesFollowingDiceRoll();
-  }
-
-  private handleRulesFollowingDiceRoll() {
-    const firstPlayerIndex = this.firstPlayerDeterminer.determineFirstPlayer(
+  private determineFirstPlayer(): boolean {
+    this.firstPlayerDeterminer.determineFirstPlayer(
       this.players,
       this.currentPlayerIndex
     );
 
-    if (this.firstPlayerDeterminer.isFirstPlayerAlreadyDetermined()) {
-      this.currentPlayerIndex = firstPlayerIndex;
+    return this.firstPlayerDeterminer.isFirstPlayerAlreadyDetermined();
+  }
+  public currentPlayerRollDice(): void {
+    this.currentPlayer.rollDice(this.dice);
+    this.handleRulesFollowingDiceRoll();
+  }
 
-      if (this.currentPlayer.latestDiceRoll === 6) {
-        this.currentPlayerMovePawn();
-        this.nextPlayer();
-      }
+  private handleRulesFollowingDiceRoll(): void {
+    if (!this.gameStarted) {
+      this.handleRulesFollowingDiceRollWhenGameNotStarted();
+    } else if (this.currentPlayer.latestDiceRoll === 6) {
+      this.currentPlayerMovePawnToStartField();
     } else {
       this.nextPlayer();
     }
   }
 
-  private currentPlayerMovePawn() {
+  private handleRulesFollowingDiceRollWhenGameNotStarted(): void {
+    if (this.determineFirstPlayer()) {
+      this.currentPlayerIndex = this.firstPlayerDeterminer.firstPlayerIndex;
+      this.gameStarted = true;
+    } else {
+      this.nextPlayer();
+    }
+  }
+
+  private currentPlayerMovePawnToStartField(): void {
     const pawnOnHomeField = this.currentPlayer.pawns.find(
       (pawn) => pawn.field instanceof HomeField
     );
