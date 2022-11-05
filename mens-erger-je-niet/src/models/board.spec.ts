@@ -62,11 +62,11 @@ describe('Board', () => {
     });
 
     it('should have landing fields connected to normal fields so that pawns can land', () => {
-      expect(board.landingFields.get(Color.Black)![0].previous).toBe(
-        board.normalFields.get(Color.Black)![0]
+      expect(board.landingFields.get(Color.Blue)![0].previous).toBe(
+        board.normalFields.get(Color.Blue)![0]
       );
-      expect(board.normalFields.get(Color.Black)![0].landingField).toBe(
-        board.landingFields.get(Color.Black)![0]
+      expect(board.normalFields.get(Color.Blue)![0].landingField).toBe(
+        board.landingFields.get(Color.Blue)![0]
       );
 
       expect(board.landingFields.get(Color.Green)![0].previous).toBe(
@@ -93,17 +93,17 @@ describe('Board', () => {
 
     describe('should have start fields connected to normal fields so that pawns can move around the board', () => {
       it('should have black start field connected to green field sets', () => {
-        expect(board.startFields.get(Color.Black)!.next).toBe(
-          board.normalFields.get(Color.Black)![0]
+        expect(board.startFields.get(Color.Blue)!.next).toBe(
+          board.normalFields.get(Color.Blue)![0]
         );
-        expect(board.normalFields.get(Color.Black)![0].previous).toBe(
-          board.startFields.get(Color.Black)!
+        expect(board.normalFields.get(Color.Blue)![0].previous).toBe(
+          board.startFields.get(Color.Blue)!
         );
-        expect(board.startFields.get(Color.Black)!.previous).toBe(
+        expect(board.startFields.get(Color.Blue)!.previous).toBe(
           board.normalFields.get(Color.Green)![8]
         );
         expect(board.normalFields.get(Color.Green)![8].next).toBe(
-          board.startFields.get(Color.Black)!
+          board.startFields.get(Color.Blue)!
         );
       });
 
@@ -145,9 +145,9 @@ describe('Board', () => {
           board.startFields.get(Color.Yellow)!
         );
         expect(board.startFields.get(Color.Yellow)!.previous).toBe(
-          board.normalFields.get(Color.Black)![8]
+          board.normalFields.get(Color.Blue)![8]
         );
-        expect(board.normalFields.get(Color.Black)![8].next).toBe(
+        expect(board.normalFields.get(Color.Blue)![8].next).toBe(
           board.startFields.get(Color.Yellow)!
         );
       });

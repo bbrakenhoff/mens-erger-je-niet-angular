@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { Board } from 'models/board';
+import { Color } from 'models/color';
 
 @Component({
   selector: 'app-board[board]',
@@ -8,4 +9,6 @@ import { Board } from 'models/board';
 })
 export class BoardComponent {
   @Input() public board!: Board;
+
+  public readonly Color = Color;
 }

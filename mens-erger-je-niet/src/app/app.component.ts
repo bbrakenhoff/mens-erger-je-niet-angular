@@ -20,7 +20,7 @@ export class AppComponent {
 
   public getColorClass(color?: Color): string {
     switch (color) {
-      case Color.Black:
+      case Color.Blue:
         return 'black';
       case Color.Green:
         return 'green';

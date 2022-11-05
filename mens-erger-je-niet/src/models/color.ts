@@ -1,8 +1,8 @@
 export enum Color {
-  Black,
-  Green,
-  Red,
-  Yellow,
+  Blue = 'blue',
+  Green = 'green',
+  Red = 'red',
+  Yellow = 'yellow',
 }
 
-export const allColors = [Color.Black, Color.Green, Color.Red, Color.Yellow];
+export const allColors = [Color.Blue, Color.Green, Color.Red, Color.Yellow];

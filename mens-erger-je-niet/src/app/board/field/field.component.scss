@@ -17,6 +17,10 @@
   border-width: 2px;
 }
 
+.normal-field {
+  opacity: 0.3;
+}
+
 .placeholder-field {
   width: 4rem;
   height: 4rem;
@@ -25,34 +29,5 @@
 .pawn {
   width: 3rem;
   height: 3rem;
-}
-
-.black {
-  background: royalblue;
-}
-.green {
-  background: limegreen;
-}
-.red {
-  background: tomato;
-}
-.yellow {
-  background: yellow;
-}
-
-.lighten {
-  opacity: 0.3;
-}
-
-.black-border {
-  border-color: royalblue;
-}
-.green-border {
-  border-color: limegreen;
-}
-.red-border {
-  border-color: tomato;
-}
-.yellow-border {
-  border-color: yellow;
+  cursor: pointer;
 }

@@ -109,9 +109,9 @@ export class Board {
 
   private static nextColor(color: Color): Color {
     if (color === Color.Yellow) {
-      return Color.Black;
+      return Color.Blue;
     }
 
-    return color + 1;
+    return allColors[allColors.indexOf(color) + 1];
   }
 }

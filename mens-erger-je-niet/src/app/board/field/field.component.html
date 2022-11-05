@@ -1,7 +1,13 @@
-<div class="field" *ngIf="field" [ngClass]="getFieldClass()">
+<div
+  class="field"
+  *ngIf="field"
+  [ngClass]="field.color | pawnColor: (isStartField ? 'border' : 'bg')"
+  [class.start-field]="isStartField"
+  [class.normal-field]="isNormalField"
+>
   <div
     *ngIf="field?.pawn"
-    [ngClass]="getColorClass(field.pawn?.color)"
+    [ngClass]="field.pawn?.color | pawnColor: 'bg'"
     class="pawn"
   ></div>
   <span>{{ index }}</span>

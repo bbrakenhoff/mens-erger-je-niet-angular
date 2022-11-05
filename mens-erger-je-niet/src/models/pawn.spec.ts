@@ -6,7 +6,7 @@ import { Pawn } from './pawn';
 describe('Pawn', () => {
   describe('moveToNextField()', () => {
     it('should move a pawn to the next field', () => {
-      const pawn = new Pawn(Color.Black);
+      const pawn = new Pawn(Color.Blue);
       const startField = new StartField(Color.Red);
       const normalField = new NormalField(Color.Yellow, 0);
       startField.next = normalField;

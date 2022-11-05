@@ -20,7 +20,7 @@ describe('Game', () => {
 
       expect(game.players[0].pawns.length).toBe(4);
       expect(
-        game.players[0].pawns.every((pawn: Pawn) => pawn.color === Color.Black)
+        game.players[0].pawns.every((pawn: Pawn) => pawn.color === Color.Blue)
       );
       expect(game.players[1].pawns.length).toBe(4);
       expect(
