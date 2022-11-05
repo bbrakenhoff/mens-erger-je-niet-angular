@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Color } from 'models/color';
 import { Field } from 'models/fields/field';
 import { HomeField } from 'models/fields/home-field';
@@ -13,15 +13,15 @@ import { StartField } from 'models/fields/start-field';
 })
 export class FieldComponent {
   @Input()
-  field?: Field;
+  public field?: Field;
 
-  get index() {
+  public get index(): number {
     return this.field instanceof NormalField
       ? (this.field as NormalField).index
-      : '';
+      : -1;
   }
 
-  getFieldClass() {
+  public getFieldClass(): string {
     if (this.field instanceof StartField) {
       return `start-field ${this.getColorClass(this.field.color)}-border`;
     } else if (
@@ -35,7 +35,7 @@ export class FieldComponent {
     return '';
   }
 
-  getColorClass(color?: Color) {
+  public getColorClass(color?: Color): string {
     switch (color) {
       case Color.Black:
         return 'black';

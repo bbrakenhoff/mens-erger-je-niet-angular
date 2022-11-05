@@ -1,3 +1,4 @@
+import { BehaviorSubject, Subject } from 'rxjs';
 import { Board } from './board';
 import { allColors, Color } from './color';
 import { Dice } from './dice';
@@ -10,6 +11,13 @@ export class Game {
   readonly dice = new Dice();
   readonly board = new Board();
 
+  private readonly firstPlayerDeterminedSubject = new BehaviorSubject<boolean>(
+    false
+  );
+  private readonly currentPlayerRolledDice = new BehaviorSubject<boolean>(
+    false
+  );
+
   players: Player[] = [];
   currentPlayerIndex = 0;
   isFirstPlayerDetermined = false;
@@ -19,6 +27,14 @@ export class Game {
   ) {
     this.createPlayers();
     this.placePawnsOnHomeFields();
+
+    this.firstPlayerDeterminedSubject.subscribe({
+      next: (firstPlayerDetermined) =>
+        this.firstPlayerDeterminer.determineFirstPlayer(
+          this.players,
+          this.currentPlayerIndex
+        ),
+    });
   }
 
   get currentPlayer() {
@@ -71,7 +87,7 @@ export class Game {
 
       if (this.currentPlayer.latestDiceRoll === 6) {
         this.currentPlayerMovePawn();
-        this.nextPlayer()
+        this.nextPlayer();
       }
     } else {
       this.nextPlayer();

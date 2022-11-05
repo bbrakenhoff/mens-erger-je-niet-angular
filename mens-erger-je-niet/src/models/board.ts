@@ -17,12 +17,12 @@ import { StartField } from './fields/start-field';
 // HH..Snn..HH
 
 export class Board {
-  readonly homeFields = new Map<Color, HomeField[]>();
-  readonly landingFields = new Map<Color, LandingField[]>();
-  readonly startFields = new Map<Color, StartField>();
-  readonly normalFields = new Map<Color, NormalField[]>();
+  public readonly homeFields = new Map<Color, HomeField[]>();
+  public readonly landingFields = new Map<Color, LandingField[]>();
+  public readonly startFields = new Map<Color, StartField>();
+  public readonly normalFields = new Map<Color, NormalField[]>();
 
-  constructor() {
+  public constructor() {
     this.createHomeFields();
     this.createLandingFields();
     this.connectLandingFieldsTogether();
@@ -33,7 +33,7 @@ export class Board {
     this.connectStartFieldToNormalFields();
   }
 
-  private createHomeFields() {
+  private createHomeFields(): void {
     allColors.forEach((color) => {
       const homeFieldsForPlayer: HomeField[] = [];
       for (let i = 0; i < 4; i++) {
@@ -43,7 +43,7 @@ export class Board {
     });
   }
 
-  private createLandingFields() {
+  private createLandingFields(): void {
     allColors.forEach((color) => {
       const landingFieldsForPlayer: LandingField[] = [];
       for (let i = 0; i < 4; i++) {
@@ -53,7 +53,7 @@ export class Board {
     });
   }
 
-  private connectLandingFieldsTogether() {
+  private connectLandingFieldsTogether(): void {
     this.landingFields.forEach((landingFieldsForPlayer) => {
       landingFieldsForPlayer.forEach((landingField, i) => {
         if (i > 0) {
@@ -68,7 +68,7 @@ export class Board {
     });
   }
 
-  private createStartFields() {
+  private createStartFields(): void {
     allColors.forEach((color) => {
       const startField = new StartField(color);
       this.homeFields
@@ -78,17 +78,17 @@ export class Board {
     });
   }
 
-  private createNormalFields() {
+  private createNormalFields(): void {
     allColors.forEach((color) => {
       const normalFieldsForPlayer: NormalField[] = [];
       for (let i = 0; i < 9; i++) {
-        normalFieldsForPlayer.push(new NormalField(color,i));
+        normalFieldsForPlayer.push(new NormalField(color, i));
       }
       this.normalFields.set(color, normalFieldsForPlayer);
     });
   }
 
-  private connectNormalFieldsTogether() {
+  private connectNormalFieldsTogether(): void {
     this.normalFields.forEach((normalFieldsForPlayer) => {
       normalFieldsForPlayer.forEach((landingField, i) => {
         if (i > 0) {
@@ -103,14 +103,14 @@ export class Board {
     });
   }
 
-  private connectNormalFieldToLandingField() {
+  private connectNormalFieldToLandingField(): void {
     this.normalFields.forEach((normalFielsForPlayer, color) => {
       normalFielsForPlayer[0].landingField = this.landingFields.get(color)![0];
       this.landingFields.get(color)![0].previous = normalFielsForPlayer[0];
     });
   }
 
-  private connectStartFieldToNormalFields() {
+  private connectStartFieldToNormalFields(): void {
     this.startFields.forEach((startField, color) => {
       startField.next = this.normalFields.get(color)![0];
       this.normalFields.get(color)![0].previous = startField;
@@ -119,7 +119,7 @@ export class Board {
     });
   }
 
-  private static nextColor(color: Color) {
+  private static nextColor(color: Color): Color {
     if (color === Color.Yellow) {
       return Color.Black;
     }

@@ -5,10 +5,13 @@ import { LandingField } from './landing-field';
 import { StartField } from './start-field';
 
 export class NormalField implements Field {
-  next!: NormalField | StartField;
-  previous!: NormalField | StartField;
-  landingField: LandingField | undefined;
-  pawn?: Pawn;
+  public next!: NormalField | StartField;
+  public previous!: NormalField | StartField;
+  public landingField: LandingField | undefined;
+  public pawn?: Pawn;
 
-  constructor(readonly color: Color, readonly index: number) {}
+  public constructor(
+    public readonly color: Color,
+    public readonly index: number
+  ) {}
 }

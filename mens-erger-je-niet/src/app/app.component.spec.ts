@@ -7,7 +7,6 @@ import { AppComponent } from './app.component';
 describe('AppComponent', () => {
   let fixture: ComponentFixture<AppComponent>;
   let app: AppComponent;
-  let gameSpy: Game;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({

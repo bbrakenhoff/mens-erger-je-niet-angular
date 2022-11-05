@@ -7,13 +7,13 @@ import { Game } from 'models/game';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
-  readonly game = new Game();
+  public readonly game = new Game();
 
-  onClickBtnRollDice() {
+  public onClickBtnRollDice(): void {
     this.game.currentPlayerRollDice();
   }
 
-  onClickBtnNextPlayer() {
+  public onClickBtnNextPlayer(): void {
     this.game.nextPlayer();
   }
 }

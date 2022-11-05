@@ -4,9 +4,9 @@ import { Field } from './field';
 import { StartField } from './start-field';
 
 export class HomeField implements Field {
-  next!: StartField;
-  previous!: Field;
-  pawn?: Pawn;
+ public  next!: StartField;
+ public  previous!: Field;
+ public  pawn?: Pawn;
 
-  constructor(readonly color: Color) {}
+  public constructor(public readonly color: Color) {}
 }
