@@ -1,8 +1,6 @@
 import { Board } from './board';
 import { allColors, Color } from './color';
 import { Dice } from './dice';
-import { HomeField } from './fields/home-field';
-import { StartField } from './fields/start-field';
 import { FirstPlayerDeterminer } from './first-player-determiner';
 import { Pawn } from './pawn';
 import { Player } from './player';
@@ -20,7 +18,6 @@ export class Game {
     private readonly firstPlayerDeterminer = new FirstPlayerDeterminer()
   ) {
     this.createPlayers();
-    this.placePawnsOnHomeFields();
   }
 
   public get currentPlayer(): Player {
@@ -28,23 +25,37 @@ export class Game {
   }
 
   private createPlayers(): void {
-    allColors.forEach((color: Color) => {
-      const pawns: Pawn[] = [];
+    const allPawnsInGame = this.createPawns();
+    for (let i = 0; i < 4; i++) {
+      const pawnColorForPlayer = allColors[i];
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      this.players.push(new Player(allPawnsInGame.get(pawnColorForPlayer)!));
+    }
+
+    this.letPlayersPutPawnsOnHomeFields();
+  }
+
+  private createPawns(): Map<Color, Pawn[]> {
+    const allPawnsInGame = new Map<Color, Pawn[]>();
+    allColors.forEach((color) => {
+      const pawns = [];
       for (let i = 0; i < 4; i++) {
         pawns.push(new Pawn(color));
       }
-
-      this.players.push(new Player(pawns));
+      allPawnsInGame.set(color, pawns);
     });
+
+    return allPawnsInGame;
   }
 
-  private placePawnsOnHomeFields(): void {
-    const pawnsOfPlayers = this.players.map((player) => player.pawns);
-    pawnsOfPlayers.forEach((pawns) => {
-      this.board.homeFields.get(pawns[0].color)?.forEach((homeField, i) => {
-        homeField.pawn = pawns[i];
-        pawns[i].field = homeField;
-      });
+  private letPlayersPutPawnsOnHomeFields(): void {
+    this.players.forEach((player, i) => {
+      console.log(
+        `%cBijoya game.ts[ln:51] - letPlayersPutPawnsOnHomeFields()`,
+        'color: deeppink'
+      );
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      player.putPawnsOnHomeFields(this.board.homeFields.get(allColors[i])!);
     });
   }
 
@@ -98,20 +109,12 @@ export class Game {
   }
 
   private currentPlayerMovePawnToStartField(): void {
-    const pawnOnHomeField = this.currentPlayer.pawns.find(
-      (pawn) => pawn.field instanceof HomeField
-    );
-    pawnOnHomeField?.moveToNextField();
+    this.currentPlayer.movePawnToStartField();
     this.isCurrentPlayerPuttingPawnOnStartField = true;
   }
 
   private currentPlayerMovePawnFromStartField(): void {
-    const pawnOnStartField = this.currentPlayer.pawns.find(
-      (pawn) => pawn.field instanceof StartField
-    );
-    if (pawnOnStartField) {
-      pawnOnStartField?.moveToNextField();
-      this.isCurrentPlayerPuttingPawnOnStartField = false;
-    }
+    this.currentPlayer.movePawnFromStartField();
+    this.isCurrentPlayerPuttingPawnOnStartField = false;
   }
 }

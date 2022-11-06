@@ -4,9 +4,31 @@ import { StartField } from './fields/start-field';
 import { Pawn } from './pawn';
 
 describe('Pawn', () => {
+  let pawn: Pawn;
+
+  beforeEach(() => {
+    pawn = new Pawn(Color.Blue);
+  });
+
+  describe('goToField()', () => {
+    it('should move to given field', () => {
+      const normalField0 = new NormalField(Color.Yellow, 0);
+      const normalField1 = new NormalField(Color.Yellow, 0);
+      normalField0.next = normalField1;
+      normalField1.previous = normalField0;
+      normalField0.pawn = pawn;
+      pawn.field = normalField0;
+
+      pawn.goToField(normalField1);
+
+      expect(pawn.field).toBe(normalField1);
+      expect(normalField1.pawn).toBe(pawn);
+      expect(normalField0.pawn).toBeUndefined();
+    });
+  });
+
   describe('moveToNextField()', () => {
     it('should move a pawn to the next field', () => {
-      const pawn = new Pawn(Color.Blue);
       const startField = new StartField(Color.Red);
       const normalField = new NormalField(Color.Yellow, 0);
       startField.next = normalField;

@@ -1,10 +1,10 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Color } from './color';
 import { HomeField } from './fields/home-field';
-import { NormalField } from './fields/normal-field';
-import { StartField } from './fields/start-field';
 import { FirstPlayerDeterminer } from './first-player-determiner';
 import { Game } from './game';
 import { Pawn } from './pawn';
+import { Player } from './player';
 
 fdescribe('Game', () => {
   let firstPlayerDeterminerSpy: FirstPlayerDeterminer;
@@ -14,9 +14,14 @@ fdescribe('Game', () => {
   beforeEach(() => {
     firstPlayerDeterminerSpy = new FirstPlayerDeterminer();
     game = new Game(firstPlayerDeterminerSpy);
+
+    game.players.forEach((player) => {
+      spyOn(player, 'movePawnToStartField');
+      spyOn(player, 'movePawnFromStartField');
+    });
   });
 
-  describe('constructor()', () => {
+  fdescribe('constructor()', () => {
     it('should create 4 players with 4 pawns each', () => {
       expect(game.players.length).toBe(4);
 
@@ -120,13 +125,14 @@ fdescribe('Game', () => {
         4,
         6
       );
-      spyOn(game.currentPlayer.pawns[0], 'moveToNextField').and.callThrough();
 
       game.currentPlayerRollDice();
       game.currentPlayerRollDice();
 
-      expect(game.players[0].pawns[0].moveToNextField).toHaveBeenCalled();
-      expect(game.players[0].pawns[0].field).toBeInstanceOf(StartField);
+      expect(game.players[0].movePawnToStartField).toHaveBeenCalled();
+      expect(game.players[1].movePawnToStartField).not.toHaveBeenCalled();
+      expect(game.players[2].movePawnToStartField).not.toHaveBeenCalled();
+      expect(game.players[3].movePawnToStartField).not.toHaveBeenCalled();
       expect(game.currentPlayerIndex).toBe(0);
     });
 
@@ -144,16 +150,17 @@ fdescribe('Game', () => {
         6,
         6
       );
-      spyOn(game.currentPlayer.pawns[0], 'moveToNextField').and.callThrough();
 
+      // determine first player
       game.currentPlayerRollDice();
+      // move pawn to start field
       game.currentPlayerRollDice();
-      expect(game.players[0].pawns[0].moveToNextField).toHaveBeenCalled();
-      expect(game.players[0].pawns[0].field).toBeInstanceOf(StartField);
-      expect(game.currentPlayerIndex).toBe(0);
+      // move pawn from start field
       game.currentPlayerRollDice();
-      expect(game.players[0].pawns[0].moveToNextField).toHaveBeenCalled();
-      expect(game.players[0].pawns[0].field).toBeInstanceOf(NormalField);
+      expect(game.players[0].movePawnFromStartField).toHaveBeenCalled();
+      expect(game.players[1].movePawnFromStartField).not.toHaveBeenCalled();
+      expect(game.players[2].movePawnFromStartField).not.toHaveBeenCalled();
+      expect(game.players[3].movePawnFromStartField).not.toHaveBeenCalled();
       expect(game.currentPlayerIndex).toBe(1);
     });
   });
