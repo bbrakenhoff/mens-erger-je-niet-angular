@@ -2,6 +2,7 @@ import { Board } from './board';
 import { allColors, Color } from './color';
 import { Dice } from './dice';
 import { HomeField } from './fields/home-field';
+import { StartField } from './fields/start-field';
 import { FirstPlayerDeterminer } from './first-player-determiner';
 import { Pawn } from './pawn';
 import { Player } from './player';
@@ -13,6 +14,7 @@ export class Game {
   public players: Player[] = [];
   public currentPlayerIndex = 0;
   private gameStarted = false;
+  private isCurrentPlayerPuttingPawnOnStartField = false;
 
   public constructor(
     private readonly firstPlayerDeterminer = new FirstPlayerDeterminer()
@@ -69,11 +71,21 @@ export class Game {
   private handleRulesFollowingDiceRoll(): void {
     if (!this.gameStarted) {
       this.handleRulesFollowingDiceRollWhenGameNotStarted();
-    } else if (this.currentPlayer.latestDiceRoll === 6) {
+    } else if (this.currentPlayerShouldMovePawnOnStartField()) {
       this.currentPlayerMovePawnToStartField();
-    } else {
+    } else if (this.isCurrentPlayerPuttingPawnOnStartField) {
+      this.currentPlayerMovePawnFromStartField();
       this.nextPlayer();
+    } else {
+      // TODO: move another pawn
     }
+  }
+
+  private currentPlayerShouldMovePawnOnStartField(): boolean {
+    return (
+      !this.isCurrentPlayerPuttingPawnOnStartField &&
+      this.currentPlayer.latestDiceRoll === 6
+    );
   }
 
   private handleRulesFollowingDiceRollWhenGameNotStarted(): void {
@@ -90,5 +102,16 @@ export class Game {
       (pawn) => pawn.field instanceof HomeField
     );
     pawnOnHomeField?.moveToNextField();
+    this.isCurrentPlayerPuttingPawnOnStartField = true;
+  }
+
+  private currentPlayerMovePawnFromStartField(): void {
+    const pawnOnStartField = this.currentPlayer.pawns.find(
+      (pawn) => pawn.field instanceof StartField
+    );
+    if (pawnOnStartField) {
+      pawnOnStartField?.moveToNextField();
+      this.isCurrentPlayerPuttingPawnOnStartField = false;
+    }
   }
 }

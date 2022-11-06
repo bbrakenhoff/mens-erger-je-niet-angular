@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { Field } from 'models/fields/field';
 import { NormalField } from 'models/fields/normal-field';
 import { StartField } from 'models/fields/start-field';

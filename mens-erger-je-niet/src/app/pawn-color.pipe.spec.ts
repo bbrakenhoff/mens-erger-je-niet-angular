@@ -1,8 +1,7 @@
 import { Color } from 'models/color';
-import { pipe } from 'rxjs';
 import { PawnColorPipe } from './pawn-color.pipe';
 
-fdescribe('PawnColorPipe', () => {
+describe('PawnColorPipe', () => {
   let pipe: PawnColorPipe;
 
   beforeEach(() => {

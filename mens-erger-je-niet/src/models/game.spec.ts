@@ -1,10 +1,12 @@
 import { Color } from './color';
 import { HomeField } from './fields/home-field';
+import { NormalField } from './fields/normal-field';
+import { StartField } from './fields/start-field';
 import { FirstPlayerDeterminer } from './first-player-determiner';
 import { Game } from './game';
 import { Pawn } from './pawn';
 
-describe('Game', () => {
+fdescribe('Game', () => {
   let firstPlayerDeterminerSpy: FirstPlayerDeterminer;
 
   let game: Game;
@@ -114,16 +116,21 @@ describe('Game', () => {
         firstPlayerDeterminerSpy,
         'firstPlayerIndex'
       ).and.returnValue(0);
-      spyOnProperty(game.currentPlayer, 'latestDiceRoll').and.returnValue(6);
-      spyOn(game.currentPlayer.pawns[0], 'moveToNextField');
+      spyOnProperty(game.currentPlayer, 'latestDiceRoll').and.returnValues(
+        4,
+        6
+      );
+      spyOn(game.currentPlayer.pawns[0], 'moveToNextField').and.callThrough();
 
       game.currentPlayerRollDice();
       game.currentPlayerRollDice();
 
       expect(game.players[0].pawns[0].moveToNextField).toHaveBeenCalled();
+      expect(game.players[0].pawns[0].field).toBeInstanceOf(StartField);
+      expect(game.currentPlayerIndex).toBe(0);
     });
 
-    it('should not let player put a pawn on start field when dice roll is not 6', () => {
+    it('should let player move pawn from start field', () => {
       spyOn(
         firstPlayerDeterminerSpy,
         'isFirstPlayerAlreadyDetermined'
@@ -132,13 +139,22 @@ describe('Game', () => {
         firstPlayerDeterminerSpy,
         'firstPlayerIndex'
       ).and.returnValue(0);
-      spyOnProperty(game.currentPlayer, 'latestDiceRoll').and.returnValue(5);
-      spyOn(game.currentPlayer.pawns[0], 'moveToNextField');
+      spyOnProperty(game.currentPlayer, 'latestDiceRoll').and.returnValues(
+        4,
+        6,
+        6
+      );
+      spyOn(game.currentPlayer.pawns[0], 'moveToNextField').and.callThrough();
 
       game.currentPlayerRollDice();
-
-      expect(game.players[0].pawns[0].moveToNextField).not.toHaveBeenCalled();
+      game.currentPlayerRollDice();
+      expect(game.players[0].pawns[0].moveToNextField).toHaveBeenCalled();
+      expect(game.players[0].pawns[0].field).toBeInstanceOf(StartField);
       expect(game.currentPlayerIndex).toBe(0);
+      game.currentPlayerRollDice();
+      expect(game.players[0].pawns[0].moveToNextField).toHaveBeenCalled();
+      expect(game.players[0].pawns[0].field).toBeInstanceOf(NormalField);
+      expect(game.currentPlayerIndex).toBe(1);
     });
   });
 });

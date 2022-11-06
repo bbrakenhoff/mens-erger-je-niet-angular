@@ -42,6 +42,7 @@ describe('FirstPlayerDeterminer', () => {
       firstPlayerDeterminer.determineFirstPlayer(players, 3);
       expect(firstPlayerDeterminer.isFirstPlayerAlreadyDetermined()).toBeTrue();
     });
+    
     it('should return true when first player already determined', () => {
       spyOnPlayer(0, 3, 4);
       spyOnPlayer(1, 4, 3);
