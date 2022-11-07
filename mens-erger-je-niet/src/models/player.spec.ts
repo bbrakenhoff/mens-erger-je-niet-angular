@@ -23,7 +23,8 @@ describe('Player', () => {
       spyOn(pawn, 'moveToNextField');
     });
 
-    player = new Player(pawns);
+    player = new Player()
+    player.pawns.push(...pawns);
   });
 
   describe('putPawnsOnHomeFields(homeFields)', () => {

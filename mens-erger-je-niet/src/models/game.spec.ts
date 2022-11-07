@@ -1,27 +1,29 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Color } from './color';
-import { HomeField } from './fields/home-field';
 import { FirstPlayerDeterminer } from './first-player-determiner';
 import { Game } from './game';
 import { Pawn } from './pawn';
 import { Player } from './player';
 
-fdescribe('Game', () => {
+describe('Game', () => {
   let firstPlayerDeterminerSpy: FirstPlayerDeterminer;
+  let playersMock: Player[];
 
   let game: Game;
 
   beforeEach(() => {
-    firstPlayerDeterminerSpy = new FirstPlayerDeterminer();
-    game = new Game(firstPlayerDeterminerSpy);
-
-    game.players.forEach((player) => {
+    playersMock = [new Player(), new Player(), new Player(), new Player()];
+    playersMock.forEach((player) => {
+      spyOn(player, 'putPawnsOnHomeFields');
       spyOn(player, 'movePawnToStartField');
       spyOn(player, 'movePawnFromStartField');
     });
+
+    firstPlayerDeterminerSpy = new FirstPlayerDeterminer();
+    game = new Game(playersMock, firstPlayerDeterminerSpy);
   });
 
-  fdescribe('constructor()', () => {
+  describe('constructor()', () => {
     it('should create 4 players with 4 pawns each', () => {
       expect(game.players.length).toBe(4);
 
@@ -45,15 +47,7 @@ fdescribe('Game', () => {
 
     it('should let players put pawns on home fields', () => {
       game.players.forEach((player) => {
-        player.pawns.forEach((pawn, i) => {
-          const homeField: HomeField = game.board.homeFields.get(pawn.color)?.[
-            i
-          ] as HomeField;
-          expect(pawn.field).toBeDefined();
-          expect(pawn.field).toBe(homeField);
-          expect(homeField?.pawn).toBe(pawn);
-          expect(homeField?.pawn).toBeDefined();
-        });
+        expect(player.putPawnsOnHomeFields).toHaveBeenCalled();
       });
     });
   });

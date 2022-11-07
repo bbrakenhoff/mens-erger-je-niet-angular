@@ -9,30 +9,19 @@ export class Game {
   public readonly dice = new Dice();
   public readonly board = new Board();
 
-  public players: Player[] = [];
   public currentPlayerIndex = 0;
   private gameStarted = false;
   private isCurrentPlayerPuttingPawnOnStartField = false;
 
   public constructor(
+    public readonly players:Player[]=[],
     private readonly firstPlayerDeterminer = new FirstPlayerDeterminer()
   ) {
-    this.createPlayers();
+    this.letPlayersPutPawnsOnHomeFields();
   }
 
   public get currentPlayer(): Player {
     return this.players[this.currentPlayerIndex];
-  }
-
-  private createPlayers(): void {
-    const allPawnsInGame = this.createPawns();
-    for (let i = 0; i < 4; i++) {
-      const pawnColorForPlayer = allColors[i];
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      this.players.push(new Player(allPawnsInGame.get(pawnColorForPlayer)!));
-    }
-
-    this.letPlayersPutPawnsOnHomeFields();
   }
 
   private createPawns(): Map<Color, Pawn[]> {
@@ -49,11 +38,14 @@ export class Game {
   }
 
   private letPlayersPutPawnsOnHomeFields(): void {
+    const allPawnsInGame=this.createPawns()
     this.players.forEach((player, i) => {
       console.log(
         `%cBijoya game.ts[ln:51] - letPlayersPutPawnsOnHomeFields()`,
         'color: deeppink'
       );
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      player.pawns.push(...allPawnsInGame.get(allColors[i])!)
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       player.putPawnsOnHomeFields(this.board.homeFields.get(allColors[i])!);
     });

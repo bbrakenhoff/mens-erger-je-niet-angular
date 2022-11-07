@@ -4,9 +4,8 @@ import { StartField } from './fields/start-field';
 import { Pawn } from './pawn';
 
 export class Player {
+  public readonly pawns: Pawn[] = [];
   private _latestDiceRoll = 0;
-
-  public constructor(public readonly pawns: Pawn[]) {}
 
   public get latestDiceRoll(): number {
     return this._latestDiceRoll;

@@ -18,7 +18,7 @@ describe('FirstPlayerDeterminer', () => {
   beforeEach(() => {
     players = [];
     for (let i = 0; i < 4; i++) {
-      players.push(new Player([]));
+      players.push(new Player());
     }
     firstPlayerDeterminer = new FirstPlayerDeterminer();
   });
