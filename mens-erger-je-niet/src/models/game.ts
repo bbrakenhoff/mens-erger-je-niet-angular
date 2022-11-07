@@ -14,7 +14,12 @@ export class Game {
   private isCurrentPlayerPuttingPawnOnStartField = false;
 
   public constructor(
-    public readonly players:Player[]=[],
+    public readonly players: Player[] = [
+      new Player(),
+      new Player(),
+      new Player(),
+      new Player(),
+    ],
     private readonly firstPlayerDeterminer = new FirstPlayerDeterminer()
   ) {
     this.letPlayersPutPawnsOnHomeFields();
@@ -38,14 +43,14 @@ export class Game {
   }
 
   private letPlayersPutPawnsOnHomeFields(): void {
-    const allPawnsInGame=this.createPawns()
+    const allPawnsInGame = this.createPawns();
     this.players.forEach((player, i) => {
       console.log(
         `%cBijoya game.ts[ln:51] - letPlayersPutPawnsOnHomeFields()`,
         'color: deeppink'
       );
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      player.pawns.push(...allPawnsInGame.get(allColors[i])!)
+      player.pawns.push(...allPawnsInGame.get(allColors[i])!);
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       player.putPawnsOnHomeFields(this.board.homeFields.get(allColors[i])!);
     });

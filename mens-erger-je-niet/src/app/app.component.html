@@ -24,10 +24,17 @@
             *ngFor="let player of game.players; let i = index"
             [class.text-bg-light]="i === game.currentPlayerIndex"
           >
-            <span [ngClass]="player.pawns[0].color | pawnColor: 'fg'">
-              Player {{ i + 1 }}</span
+            <span
+              class="badge me-3 fs-6"
+              [ngClass]="player.pawns[0].color | pawnColor: 'bg'"
+              >Player {{ i + 1 }}
+            </span>
+            <span
+              class="badge fs-6"
+              [ngClass]="player.pawns[0].color | pawnColor: 'bg'"
             >
-            latest dice roll {{ player.latestDiceRoll }}
+              latest dice roll {{ player.latestDiceRoll }}
+            </span>
           </li>
         </ul>
       </div>

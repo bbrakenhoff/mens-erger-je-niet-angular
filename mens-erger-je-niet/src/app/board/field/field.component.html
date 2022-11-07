@@ -1,7 +1,11 @@
 <div
   class="field"
   *ngIf="field"
-  [ngClass]="field.color | pawnColor: (isStartField ? 'border' : 'bg')"
+  [ngClass]="
+    !isNormalField
+      ? (field.color | pawnColor: (isStartField ? 'border' : 'bg'))
+      : ''
+  "
   [class.start-field]="isStartField"
   [class.normal-field]="isNormalField"
 >
@@ -10,6 +14,6 @@
     [ngClass]="field.pawn?.color | pawnColor: 'bg'"
     class="pawn"
   ></div>
-  <span>{{ index }}</span>
+  <!-- <span>{{ index }}</span> -->
 </div>
 <div class="placeholder-field" *ngIf="!field"></div>
