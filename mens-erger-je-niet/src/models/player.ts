@@ -13,7 +13,7 @@ export class Player {
 
   public putPawnsOnHomeFields(homeFields: HomeField[]): void {
     this.pawns.forEach((pawn, i) => {
-      pawn.goToField(homeFields[i]);
+      pawn.moveTo(homeFields[i]);
     });
   }
 
@@ -38,7 +38,7 @@ export class Player {
   }
 
   public movePawnFromStartField(): void {
-    this.findPawnOnStartField()?.moveToNextField();
+    this.findPawnOnStartField()?.moveFurther(this.latestDiceRoll);
   }
 
   private findPawnOnStartField(): Pawn | undefined {

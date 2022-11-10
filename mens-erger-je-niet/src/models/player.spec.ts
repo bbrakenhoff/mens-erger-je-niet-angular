@@ -19,7 +19,8 @@ describe('Player', () => {
       new Pawn(Color.Blue),
     ];
     pawns.forEach((pawn) => {
-      spyOn(pawn, 'goToField');
+      spyOn(pawn, 'moveTo');
+      spyOn(pawn, 'moveFurther');
       spyOn(pawn, 'moveToNextField');
     });
 
@@ -36,10 +37,10 @@ describe('Player', () => {
         new HomeField(Color.Blue),
       ];
       player.putPawnsOnHomeFields(homeFields);
-      expect(pawns[0].goToField).toHaveBeenCalledWith(homeFields[0]);
-      expect(pawns[1].goToField).toHaveBeenCalledWith(homeFields[1]);
-      expect(pawns[2].goToField).toHaveBeenCalledWith(homeFields[2]);
-      expect(pawns[3].goToField).toHaveBeenCalledWith(homeFields[3]);
+      expect(pawns[0].moveTo).toHaveBeenCalledWith(homeFields[0]);
+      expect(pawns[1].moveTo).toHaveBeenCalledWith(homeFields[1]);
+      expect(pawns[2].moveTo).toHaveBeenCalledWith(homeFields[2]);
+      expect(pawns[3].moveTo).toHaveBeenCalledWith(homeFields[3]);
     });
   });
 
@@ -97,11 +98,12 @@ describe('Player', () => {
       pawns[2].field = new StartField(Color.Blue);
       pawns[3].field = new NormalField(Color.Blue, 2);
 
+      const dice: Dice = new Dice();
+      spyOn(dice, 'roll').and.returnValue(3);
+      player.rollDice(dice);
       player.movePawnFromStartField();
-      expect(pawns[0].moveToNextField).not.toHaveBeenCalled();
-      expect(pawns[1].moveToNextField).not.toHaveBeenCalled();
-      expect(pawns[2].moveToNextField).toHaveBeenCalled();
-      expect(pawns[3].moveToNextField).not.toHaveBeenCalled();
+
+      expect(pawns[2].moveFurther).toHaveBeenCalledWith(3);
     });
 
     it('should not move a pawn when pawn found on a start field of other color', () => {
@@ -111,10 +113,10 @@ describe('Player', () => {
       pawns[3].field = new NormalField(Color.Blue, 2);
 
       player.movePawnFromStartField();
-      expect(pawns[0].moveToNextField).not.toHaveBeenCalled();
-      expect(pawns[1].moveToNextField).not.toHaveBeenCalled();
-      expect(pawns[2].moveToNextField).not.toHaveBeenCalled();
-      expect(pawns[3].moveToNextField).not.toHaveBeenCalled();
+      expect(pawns[0].moveFurther).not.toHaveBeenCalled();
+      expect(pawns[1].moveFurther).not.toHaveBeenCalled();
+      expect(pawns[2].moveFurther).not.toHaveBeenCalled();
+      expect(pawns[3].moveFurther).not.toHaveBeenCalled();
     });
 
     it('should not move a pawn when no pawn on start field', () => {
@@ -124,10 +126,10 @@ describe('Player', () => {
       pawns[3].field = new NormalField(Color.Blue, 2);
 
       player.movePawnFromStartField();
-      expect(pawns[0].moveToNextField).not.toHaveBeenCalled();
-      expect(pawns[1].moveToNextField).not.toHaveBeenCalled();
-      expect(pawns[2].moveToNextField).not.toHaveBeenCalled();
-      expect(pawns[3].moveToNextField).not.toHaveBeenCalled();
+      expect(pawns[0].moveFurther).not.toHaveBeenCalled();
+      expect(pawns[1].moveFurther).not.toHaveBeenCalled();
+      expect(pawns[2].moveFurther).not.toHaveBeenCalled();
+      expect(pawns[3].moveFurther).not.toHaveBeenCalled();
     });
   });
 
