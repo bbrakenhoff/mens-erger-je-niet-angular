@@ -1,4 +1,5 @@
-.board{
+.board {
   display: grid;
-  grid-template-columns: repeat(11,5rem);
+  grid-template-columns: repeat(11, 1fr);
+  gap: 1rem;
 }
