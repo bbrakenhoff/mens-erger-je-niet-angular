@@ -1,5 +1,6 @@
 import { Dice } from './dice';
 import { HomeField } from './fields/home-field';
+import { NormalField } from './fields/normal-field';
 import { StartField } from './fields/start-field';
 import { Pawn } from './pawn';
 
@@ -45,6 +46,13 @@ export class Player {
     return this.pawns.find(
       (pawn) =>
         pawn.field instanceof StartField && pawn.field.color === pawn.color
+    );
+  }
+
+  public hasPawnsToMove(): boolean {
+    return this.pawns.some(
+      (pawn) =>
+        pawn.field instanceof StartField || pawn.field instanceof NormalField
     );
   }
 }

@@ -45,10 +45,6 @@ export class Game {
   private letPlayersPutPawnsOnHomeFields(): void {
     const allPawnsInGame = this.createPawns();
     this.players.forEach((player, i) => {
-      console.log(
-        `%cBijoya game.ts[ln:51] - letPlayersPutPawnsOnHomeFields()`,
-        'color: deeppink'
-      );
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       player.pawns.push(...allPawnsInGame.get(allColors[i])!);
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -85,7 +81,11 @@ export class Game {
       this.currentPlayerMovePawnFromStartField();
       this.nextPlayer();
     } else {
-      // TODO: move another pawn
+      if (this.currentPlayer.hasPawnsToMove()) {
+        // TODO: move another pawn
+      } else {
+        this.nextPlayer();
+      }
     }
   }
 

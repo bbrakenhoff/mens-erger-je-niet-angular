@@ -24,7 +24,7 @@ describe('Player', () => {
       spyOn(pawn, 'moveToNextField');
     });
 
-    player = new Player()
+    player = new Player();
     player.pawns.push(...pawns);
   });
 
@@ -148,6 +148,44 @@ describe('Player', () => {
       expect(pawns[1].moveToNextField).not.toHaveBeenCalled();
       expect(pawns[2].moveToNextField).not.toHaveBeenCalled();
       expect(pawns[3].moveToNextField).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('hasPawnsToMove()', () => {
+    it('should return true when at least one of the pawns is on a normal field', () => {
+      pawns[0].field = new NormalField(Color.Blue, 0);
+      pawns[1].field = new HomeField(Color.Blue);
+      pawns[2].field = new HomeField(Color.Blue);
+      pawns[3].field = new LandingField(Color.Blue);
+
+      expect(player.hasPawnsToMove()).toBeTrue();
+    });
+
+    it('should return true when at least one of the pawns is on a start field', () => {
+      pawns[0].field = new StartField(Color.Blue);
+      pawns[1].field = new HomeField(Color.Blue);
+      pawns[2].field = new HomeField(Color.Blue);
+      pawns[3].field = new LandingField(Color.Blue);
+
+      expect(player.hasPawnsToMove()).toBeTrue();
+    });
+
+    it('should return false when all pawns on home field', () => {
+      pawns[0].field = new HomeField(Color.Blue);
+      pawns[1].field = new HomeField(Color.Blue);
+      pawns[2].field = new HomeField(Color.Blue);
+      pawns[3].field = new HomeField(Color.Blue);
+
+      expect(player.hasPawnsToMove()).toBeFalse();
+    });
+
+    it('should return false when all pawns on landing field', () => {
+      pawns[0].field = new LandingField(Color.Blue);
+      pawns[1].field = new LandingField(Color.Blue);
+      pawns[2].field = new LandingField(Color.Blue);
+      pawns[3].field = new LandingField(Color.Blue);
+
+      expect(player.hasPawnsToMove()).toBeFalse();
     });
   });
 });

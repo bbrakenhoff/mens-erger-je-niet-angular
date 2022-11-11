@@ -157,5 +157,28 @@ describe('Game', () => {
       expect(game.players[3].movePawnFromStartField).not.toHaveBeenCalled();
       expect(game.currentPlayerIndex).toBe(1);
     });
+
+    it('should give the turn to the next player when no pawns are able to move', () => {
+      spyOn(
+        firstPlayerDeterminerSpy,
+        'isFirstPlayerAlreadyDetermined'
+      ).and.returnValue(true);
+      spyOnProperty(
+        firstPlayerDeterminerSpy,
+        'firstPlayerIndex'
+      ).and.returnValue(0);
+      spyOnProperty(game.currentPlayer, 'latestDiceRoll').and.returnValues(
+        4,
+        4,
+      );
+      spyOn(game.currentPlayer, 'hasPawnsToMove').and.returnValue(false);
+
+      // determine first player
+      game.currentPlayerRollDice();
+      // no pawns on normal field or start field
+      game.currentPlayerRollDice();
+
+      expect(game.currentPlayerIndex).toBe(1);
+    });
   });
 });

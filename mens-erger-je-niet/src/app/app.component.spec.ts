@@ -3,6 +3,7 @@ import { By } from '@angular/platform-browser';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Game } from 'models/game';
 import { AppComponent } from './app.component';
+import { PawnColorPipe } from './pawn-color.pipe';
 
 describe('AppComponent', () => {
   let fixture: ComponentFixture<AppComponent>;
@@ -11,7 +12,7 @@ describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [RouterTestingModule],
-      declarations: [AppComponent],
+      declarations: [AppComponent, PawnColorPipe],
     }).compileComponents();
   });
 
@@ -31,14 +32,5 @@ describe('AppComponent', () => {
     ).nativeElement;
     btnRollDice.click();
     expect(app.game.currentPlayerRollDice).toHaveBeenCalled();
-  });
-
-  it('should give turn to next player when button clicked', () => {
-    spyOn(app.game, 'nextPlayer');
-    const btnNextPlayer: HTMLButtonElement = fixture.debugElement.query(
-      By.css('#btn-nextPlayer')
-    ).nativeElement;
-    btnNextPlayer.click();
-    expect(app.game.nextPlayer).toHaveBeenCalled();
   });
 });
