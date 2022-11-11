@@ -1,46 +1,37 @@
-<div class="container border m-5 p-5">
-  <div class="row">
+<div class="container m-5 text-center">
+  <div class="row gx-0">
     <div class="col">
-      <button
-        (click)="onClickBtnRollDice()"
-        id="btn-rollDice"
-        class="btn btn-primary mb-4 me-1"
-      >
-        Roll dice
-      </button>
-      <button
-        (click)="onClickBtnNextPlayer()"
-        id="btn-nextPlayer"
-        class="btn btn-primary mb-4"
-      >
-        Next player
-      </button>
-    </div>
-    <div class="row">
-      <div class="col mb-3">
-        <ul class="list-group">
-          <li
-            class="list-group-item"
-            *ngFor="let player of game.players; let i = index"
-            [class.text-bg-light]="i === game.currentPlayerIndex"
+      <div class="card h-100" style="border-radius: 0">
+        <div class="card-body d-flex flex-column justify-content-center">
+          <div class="card-text">Latest dice roll</div>
+          <h1 class="card-title">{{ game.currentPlayer.latestDiceRoll }}</h1>
+          <button
+            (click)="onClickBtnRollDice()"
+            id="btn-rollDice"
+            class="btn btn-light"
           >
-            <span
-              class="badge me-3 fs-6"
-              [ngClass]="player.pawns[0].color | pawnColor: 'bg'"
-              >Player {{ i + 1 }}
-            </span>
-            <span
-              class="badge fs-6"
-              [ngClass]="player.pawns[0].color | pawnColor: 'bg'"
-            >
-              latest dice roll {{ player.latestDiceRoll }}
-            </span>
-          </li>
-        </ul>
+            Roll dice
+          </button>
+        </div>
       </div>
     </div>
-    <div class="row">
-      <div class="col">
+    <div class="col">
+      <div class="card h-100 border-start-0" style="border-radius: 0">
+        <div class="card-body d-flex flex-column justify-content-center">
+          <div class="card-text">Current player</div>
+          <h1
+            class="card-title"
+            [ngClass]="game.currentPlayer.pawns[0].color | pawnColor: 'fg'"
+          >
+            Player {{ game.currentPlayerIndex + 1 }}
+          </h1>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card border-top-0" style="border-radius: 0">
+      <div class="card-body">
         <app-board [board]="game.board"></app-board>
       </div>
     </div>

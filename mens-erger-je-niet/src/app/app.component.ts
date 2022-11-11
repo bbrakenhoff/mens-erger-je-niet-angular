@@ -13,11 +13,7 @@ export class AppComponent {
   public onClickBtnRollDice(): void {
     this.game.currentPlayerRollDice();
   }
-
-  public onClickBtnNextPlayer(): void {
-    this.game.nextPlayer();
-  }
-
+  
   public getColorClass(color?: Color): string {
     switch (color) {
       case Color.Blue:
