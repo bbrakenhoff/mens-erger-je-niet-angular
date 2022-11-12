@@ -15,13 +15,17 @@ export class Pawn {
   }
 
   public moveFurther(steps: number): void {
+    this.moveTo(this.findField(steps));
+  }
+
+  public findField(steps: number): Field {
     let fieldToMoveTo = this.field;
 
     for (let step = 0; step < steps; step++) {
       fieldToMoveTo = fieldToMoveTo.next;
     }
 
-    this.moveTo(fieldToMoveTo);
+    return fieldToMoveTo;
   }
 
   public moveToNextField(): void {

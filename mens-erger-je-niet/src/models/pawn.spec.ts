@@ -63,7 +63,7 @@ describe('Pawn', () => {
       normalField0.pawn = pawn;
       pawn.field = normalField0;
 
-      pawn.moveFurther(5)
+      pawn.moveFurther(5);
       expect(pawn.field).toBe(normalField5);
       expect(normalField5.pawn).toBe(pawn);
       expect(normalField0.pawn).toBeUndefined();
@@ -72,6 +72,29 @@ describe('Pawn', () => {
       expect(normalField3.pawn).toBeUndefined();
       expect(normalField4.pawn).toBeUndefined();
       expect(normalField6.pawn).toBeUndefined();
+    });
+  });
+
+  describe('findField(steps)', () => {
+    it('should return the field in given number of steps', () => {
+      const normalField0 = new NormalField(Color.Yellow, 0);
+      const normalField1 = new NormalField(Color.Yellow, 1);
+      const normalField2 = new NormalField(Color.Yellow, 2);
+      const normalField3 = new NormalField(Color.Yellow, 3);
+      const normalField4 = new NormalField(Color.Yellow, 4);
+      const normalField5 = new NormalField(Color.Yellow, 5);
+      const normalField6 = new NormalField(Color.Yellow, 6);
+      normalField0.next = normalField1;
+      normalField1.next = normalField2;
+      normalField2.next = normalField3;
+      normalField3.next = normalField4;
+      normalField4.next = normalField5;
+      normalField5.next = normalField6;
+
+      normalField0.pawn = pawn;
+      pawn.field = normalField0;
+
+      expect(pawn.findField(5)).toBe(normalField5);
     });
   });
 });

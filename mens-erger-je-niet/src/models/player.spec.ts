@@ -28,6 +28,41 @@ describe('Player', () => {
     player.pawns.push(...pawns);
   });
 
+  describe('pawnColor', () => {
+    it('should return the color of the pawns', () => {
+      expect(player.pawnColor).toBe(pawns[0].color);
+    });
+  });
+
+  describe('putPawnOnHomeField', () => {
+    let homeFields: HomeField[];
+
+    beforeEach(() => {
+      homeFields = [
+        new HomeField(Color.Blue),
+        new HomeField(Color.Blue),
+        new HomeField(Color.Blue),
+        new HomeField(Color.Blue),
+      ];
+    });
+
+    it('should put pawns on given home fields', () => {
+      homeFields[0].pawn = pawns[1];
+      homeFields[1].pawn = pawns[3];
+      homeFields[2].pawn = pawns[0];
+
+      player.putPawnOnHomeField(pawns[3], homeFields);
+      expect(pawns[3].moveTo).toHaveBeenCalledWith(homeFields[3]);
+    });
+
+    it("should throw an error when trying to move another player's pawn", () => {
+      const otherPawn = new Pawn(Color.Green);
+      expect(() =>
+        player.putPawnOnHomeField(otherPawn, homeFields)
+      ).toThrowError("Player can only move it's own pawns");
+    });
+  });
+
   describe('putPawnsOnHomeFields(homeFields)', () => {
     it('should put pawns on given home fields', () => {
       const homeFields = [
@@ -133,21 +168,42 @@ describe('Player', () => {
     });
   });
 
-  describe('movePawn(pawn)', () => {
+  fdescribe('movePawn(pawn)', () => {
+    let normalFields: NormalField[];
+    let otherPawn: Pawn;
+
+    beforeEach(() => {
+      otherPawn = new Pawn(Color.Blue);
+
+      normalFields = [
+        new NormalField(Color.Blue, 0),
+        new NormalField(Color.Blue, 1),
+        new NormalField(Color.Blue, 2),
+      ];
+      normalFields[0].next = normalFields[1];
+      normalFields[1].next = normalFields[2];
+
+      pawns[1].field = normalFields[0];
+      normalFields[0].pawn = pawns[1];
+    });
+
     it("should throw an error when trying to move another player's pawn", () => {
-      const otherPawn = new Pawn(Color.Blue);
       expect(() => player.movePawn(otherPawn)).toThrowError(
         "Player can only move it's own pawns"
       );
     });
 
-    it('should move the given pawn', () => {
-      pawns[0].field = new NormalField(Color.Blue, 0);
-      player.movePawn(pawns[0]);
-      expect(pawns[0].moveToNextField).toHaveBeenCalled();
-      expect(pawns[1].moveToNextField).not.toHaveBeenCalled();
-      expect(pawns[2].moveToNextField).not.toHaveBeenCalled();
-      expect(pawns[3].moveToNextField).not.toHaveBeenCalled();
+    it('should move the given pawn and return undefined when no pawn on field', () => {
+      expect(player.movePawn(pawns[1])).toBeUndefined();
+      expect(pawns[1].moveTo).toHaveBeenCalledWith(normalFields[2]);
+    });
+
+    it('should move the given pawn and return the pawn already on field', () => {
+      normalFields[2].pawn = otherPawn;
+      otherPawn.field = normalFields[2];
+
+      expect(player.movePawn(pawns[1])).toBe(otherPawn);
+      expect(pawns[1].moveTo).toHaveBeenCalledWith(normalFields[2]);
     });
   });
 

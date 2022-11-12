@@ -1,3 +1,4 @@
+import { Color } from './color';
 import { Dice } from './dice';
 import { HomeField } from './fields/home-field';
 import { NormalField } from './fields/normal-field';
@@ -12,6 +13,23 @@ export class Player {
     return this._latestDiceRoll;
   }
 
+  public get pawnColor(): Color {
+    return this.pawns[0].color;
+  }
+
+  public putPawnOnHomeField(pawn: Pawn, homeFields: HomeField[]): void {
+    if (this.pawns.includes(pawn)) {
+      pawn.moveTo(this.findEmptyHomeField(homeFields));
+    } else {
+      throw new Error("Player can only move it's own pawns");
+    }
+  }
+
+  private findEmptyHomeField(homeFields: HomeField[]): HomeField {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return homeFields.find((homeField) => !homeField.pawn)!;
+  }
+
   public putPawnsOnHomeFields(homeFields: HomeField[]): void {
     this.pawns.forEach((pawn, i) => {
       pawn.moveTo(homeFields[i]);
@@ -22,9 +40,12 @@ export class Player {
     this._latestDiceRoll = dice.roll();
   }
 
-  public movePawn(pawn: Pawn): void {
+  public movePawn(pawn: Pawn): Pawn | undefined {
     if (this.pawns.includes(pawn)) {
-      pawn.moveToNextField();
+      const fieldToMoveTo = pawn.findField(2);
+      pawn.moveTo(fieldToMoveTo);
+
+      return fieldToMoveTo.pawn;
     } else {
       throw new Error("Player can only move it's own pawns");
     }
