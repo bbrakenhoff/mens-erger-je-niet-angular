@@ -42,10 +42,7 @@ export class Player {
 
   public movePawn(pawn: Pawn): Pawn | undefined {
     if (this.pawns.includes(pawn)) {
-      const fieldToMoveTo = pawn.findField(2);
-      pawn.moveTo(fieldToMoveTo);
-
-      return fieldToMoveTo.pawn;
+      return pawn.moveToFieldAfter(this.latestDiceRoll);
     } else {
       throw new Error("Player can only move it's own pawns");
     }
@@ -60,7 +57,10 @@ export class Player {
   }
 
   public movePawnFromStartField(): void {
-    this.findPawnOnStartField()?.moveFurther(this.latestDiceRoll);
+    const pawnOnStartField = this.findPawnOnStartField();
+    if (pawnOnStartField) {
+      this.movePawn(pawnOnStartField);
+    }
   }
 
   private findPawnOnStartField(): Pawn | undefined {
