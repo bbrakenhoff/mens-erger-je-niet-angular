@@ -81,9 +81,7 @@ export class Game {
       this.currentPlayerMovePawnFromStartField();
       this.nextPlayer();
     } else {
-      if (this.currentPlayer.hasPawnsToMove()) {
-        // TODO: move another pawn
-      } else {
+      if (!this.currentPlayer.hasPawnsToMove()) {
         this.nextPlayer();
       }
     }
@@ -113,5 +111,9 @@ export class Game {
   private currentPlayerMovePawnFromStartField(): void {
     this.currentPlayer.movePawnFromStartField();
     this.isCurrentPlayerPuttingPawnOnStartField = false;
+  }
+
+  public currentPlayerMovePawn(pawn: Pawn): void {
+    this.currentPlayer.movePawn(pawn);
   }
 }

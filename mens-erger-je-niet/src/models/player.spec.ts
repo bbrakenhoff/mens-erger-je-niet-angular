@@ -16,11 +16,6 @@ type PawnSpy = {
 };
 
 describe('Player', () => {
-  let latestDiceRoll = 3;
-  let pawnsSpies: PawnSpy[];
-  let otherPlayersPawnSpy: PawnSpy;
-  let player: Player;
-  let dice: Dice;
   const createPawnSpy = (color: Color = Color.Blue): PawnSpy => {
     const pawn = new Pawn(color);
     return {
@@ -30,6 +25,12 @@ describe('Player', () => {
       moveToNextFieldSpy: spyOn(pawn, 'moveToNextField'),
     };
   };
+
+  const latestDiceRoll = 3;
+  let pawnsSpies: PawnSpy[];
+  let otherPlayersPawnSpy: PawnSpy;
+  let player: Player;
+  let dice: Dice;
 
   beforeEach(() => {
     dice = new Dice();

@@ -1,26 +1,77 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Color } from './color';
+import { HomeField } from './fields/home-field';
 import { FirstPlayerDeterminer } from './first-player-determiner';
 import { Game } from './game';
 import { Pawn } from './pawn';
 import { Player } from './player';
 
-describe('Game', () => {
-  let firstPlayerDeterminerSpy: FirstPlayerDeterminer;
-  let playersMock: Player[];
+type PlayerSpy = {
+  player: Player;
+  putPawnsOnHomeFieldsSpy: jasmine.Spy<(homeFields: HomeField[]) => void>;
+  movePawnToStartFieldSpy: jasmine.Spy<() => void>;
+  movePawnFromStartFieldSpy: jasmine.Spy<() => void>;
+  movePawnSpy: jasmine.Spy<(pawn: Pawn) => Pawn | undefined>;
+  latestDiceRollSpy: jasmine.Spy<(this: Player) => number>;
+  hasPawnsToMove: jasmine.Spy<() => boolean>;
+};
+
+fdescribe('Game', () => {
+  const createPlayerSpy = (): PlayerSpy => {
+    const player = new Player();
+    return {
+      player,
+      putPawnsOnHomeFieldsSpy: spyOn(player, 'putPawnsOnHomeFields'),
+      movePawnToStartFieldSpy: spyOn(player, 'movePawnToStartField'),
+      movePawnFromStartFieldSpy: spyOn(player, 'movePawnFromStartField'),
+      movePawnSpy: spyOn(player, 'movePawn'),
+      latestDiceRollSpy: spyOnProperty(player, 'latestDiceRoll'),
+      hasPawnsToMove: spyOn(player, 'hasPawnsToMove'),
+    };
+  };
+
+  let firstPlayerDeterminerSpy: {
+    firsPlayerDeterminer: FirstPlayerDeterminer;
+    determineFirstPlayerSpy: jasmine.Spy<
+      (players: Player[], currentPlayerIndex: number) => void
+    >;
+    isFirstPlayerAlreadyDeterminedSpy: jasmine.Spy<() => boolean>;
+    firstPlayerIndexSpy: jasmine.Spy<(this: FirstPlayerDeterminer) => number>;
+  };
+  let playersSpies: PlayerSpy[];
 
   let game: Game;
 
   beforeEach(() => {
-    playersMock = [new Player(), new Player(), new Player(), new Player()];
-    playersMock.forEach((player) => {
-      spyOn(player, 'putPawnsOnHomeFields');
-      spyOn(player, 'movePawnToStartField');
-      spyOn(player, 'movePawnFromStartField');
-    });
+    playersSpies = [
+      createPlayerSpy(),
+      createPlayerSpy(),
+      createPlayerSpy(),
+      createPlayerSpy(),
+    ];
 
-    firstPlayerDeterminerSpy = new FirstPlayerDeterminer();
-    game = new Game(playersMock, firstPlayerDeterminerSpy);
+    const firstPlayerDeterminer = new FirstPlayerDeterminer();
+    firstPlayerDeterminerSpy = {
+      firsPlayerDeterminer: firstPlayerDeterminer,
+      determineFirstPlayerSpy: spyOn(
+        firstPlayerDeterminer,
+        'determineFirstPlayer'
+      ),
+      isFirstPlayerAlreadyDeterminedSpy: spyOn(
+        firstPlayerDeterminer,
+        'isFirstPlayerAlreadyDetermined'
+      ),
+      firstPlayerIndexSpy: spyOnProperty(
+        firstPlayerDeterminer,
+        'firstPlayerIndex'
+      ),
+    };
+
+    new FirstPlayerDeterminer();
+    game = new Game(
+      playersSpies.map((playerSpy) => playerSpy.player),
+      firstPlayerDeterminerSpy.firsPlayerDeterminer
+    );
   });
 
   describe('constructor()', () => {
@@ -81,10 +132,9 @@ describe('Game', () => {
     });
 
     it('should determine the first player', () => {
-      spyOn(firstPlayerDeterminerSpy, 'determineFirstPlayer');
       game.currentPlayerRollDice();
       expect(
-        firstPlayerDeterminerSpy.determineFirstPlayer
+        firstPlayerDeterminerSpy.determineFirstPlayerSpy
       ).toHaveBeenCalledWith(game.players, 0);
     });
 
@@ -94,56 +144,36 @@ describe('Game', () => {
     });
 
     it('should give the turn to player with highest dice roll when first player determined', () => {
-      spyOn(
-        firstPlayerDeterminerSpy,
-        'isFirstPlayerAlreadyDetermined'
-      ).and.returnValue(true);
-      spyOnProperty(
-        firstPlayerDeterminerSpy,
-        'firstPlayerIndex'
-      ).and.returnValue(1);
+      firstPlayerDeterminerSpy.isFirstPlayerAlreadyDeterminedSpy.and.returnValue(
+        true
+      );
+      firstPlayerDeterminerSpy.firstPlayerIndexSpy.and.returnValue(1);
       game.currentPlayerRollDice();
       expect(game.currentPlayerIndex).toBe(1);
     });
 
     it('should let player put a pawn on start field when dice roll is 6', () => {
-      spyOn(
-        firstPlayerDeterminerSpy,
-        'isFirstPlayerAlreadyDetermined'
-      ).and.returnValue(true);
-      spyOnProperty(
-        firstPlayerDeterminerSpy,
-        'firstPlayerIndex'
-      ).and.returnValue(0);
-      spyOnProperty(game.currentPlayer, 'latestDiceRoll').and.returnValues(
-        4,
-        6
+      firstPlayerDeterminerSpy.isFirstPlayerAlreadyDeterminedSpy.and.returnValue(
+        true
       );
+      firstPlayerDeterminerSpy.firstPlayerIndexSpy.and.returnValue(0);
+      playersSpies[0].latestDiceRollSpy.and.returnValues(6);
 
       game.currentPlayerRollDice();
       game.currentPlayerRollDice();
 
       expect(game.players[0].movePawnToStartField).toHaveBeenCalled();
-      expect(game.players[1].movePawnToStartField).not.toHaveBeenCalled();
-      expect(game.players[2].movePawnToStartField).not.toHaveBeenCalled();
-      expect(game.players[3].movePawnToStartField).not.toHaveBeenCalled();
       expect(game.currentPlayerIndex).toBe(0);
     });
 
     it('should let player move pawn from start field', () => {
-      spyOn(
-        firstPlayerDeterminerSpy,
-        'isFirstPlayerAlreadyDetermined'
-      ).and.returnValue(true);
-      spyOnProperty(
-        firstPlayerDeterminerSpy,
-        'firstPlayerIndex'
-      ).and.returnValue(0);
-      spyOnProperty(game.currentPlayer, 'latestDiceRoll').and.returnValues(
-        4,
-        6,
-        6
+      firstPlayerDeterminerSpy.isFirstPlayerAlreadyDeterminedSpy.and.returnValue(
+        true
       );
+      firstPlayerDeterminerSpy.firstPlayerIndexSpy.and.returnValue(0);
+      playersSpies[0].latestDiceRollSpy.and.returnValues(6);
+
+      expect(game.currentPlayerIndex).toBe(0);
 
       // determine first player
       game.currentPlayerRollDice();
@@ -152,33 +182,47 @@ describe('Game', () => {
       // move pawn from start field
       game.currentPlayerRollDice();
       expect(game.players[0].movePawnFromStartField).toHaveBeenCalled();
-      expect(game.players[1].movePawnFromStartField).not.toHaveBeenCalled();
-      expect(game.players[2].movePawnFromStartField).not.toHaveBeenCalled();
-      expect(game.players[3].movePawnFromStartField).not.toHaveBeenCalled();
       expect(game.currentPlayerIndex).toBe(1);
     });
 
-    it('should give the turn to the next player when no pawns are able to move', () => {
-      spyOn(
-        firstPlayerDeterminerSpy,
-        'isFirstPlayerAlreadyDetermined'
-      ).and.returnValue(true);
-      spyOnProperty(
-        firstPlayerDeterminerSpy,
-        'firstPlayerIndex'
-      ).and.returnValue(0);
-      spyOnProperty(game.currentPlayer, 'latestDiceRoll').and.returnValues(
-        4,
-        4,
+    it('should let the current player move a pawn', () => {
+      firstPlayerDeterminerSpy.isFirstPlayerAlreadyDeterminedSpy.and.returnValue(
+        true
       );
-      spyOn(game.currentPlayer, 'hasPawnsToMove').and.returnValue(false);
+      firstPlayerDeterminerSpy.firstPlayerIndexSpy.and.returnValue(0);
+      playersSpies[0].latestDiceRollSpy.and.returnValues(4, 6, 6, 3);
+      // spyOnProperty(game.currentPlayer, 'latestDiceRoll').and.returnValues(
+      //   4,
+      //   6,
+      //   6,
+      //   3
+      // );
+      playersSpies[0].hasPawnsToMove.and.returnValue(true);
+      playersSpies[0].movePawnSpy.and.returnValue(undefined);
 
       // determine first player
       game.currentPlayerRollDice();
-      // no pawns on normal field or start field
+      // move pawn to start field
+      game.currentPlayerRollDice();
+      // move pawn from start field
       game.currentPlayerRollDice();
 
-      expect(game.currentPlayerIndex).toBe(1);
+      // let other players have a turn
+      game.currentPlayerRollDice();
+      game.currentPlayerRollDice();
+      game.currentPlayerRollDice();
+
+      // back at first player
+      game.currentPlayerRollDice();
+
+      expect(game.currentPlayerIndex).toBe(0);
+      game.currentPlayerRollDice();
+
+      game.currentPlayerMovePawn(game.currentPlayer.pawns[0]);
+
+      expect(game.players[0].movePawn).toHaveBeenCalledWith(
+        game.players[0].pawns[0]
+      );
     });
   });
 });
