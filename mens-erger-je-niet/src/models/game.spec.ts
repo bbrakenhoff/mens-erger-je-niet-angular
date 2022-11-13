@@ -16,7 +16,7 @@ type PlayerSpy = {
   hasPawnsToMove: jasmine.Spy<() => boolean>;
 };
 
-fdescribe('Game', () => {
+describe('Game', () => {
   const createPlayerSpy = (): PlayerSpy => {
     const player = new Player();
     return {
