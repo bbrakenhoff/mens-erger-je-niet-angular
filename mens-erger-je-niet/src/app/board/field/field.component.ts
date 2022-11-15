@@ -1,7 +1,8 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Field } from 'models/fields/field';
 import { NormalField } from 'models/fields/normal-field';
 import { StartField } from 'models/fields/start-field';
+import { Pawn } from 'models/pawn';
 
 @Component({
   selector: 'app-field',
@@ -12,6 +13,9 @@ export class FieldComponent {
   @Input()
   public field?: Field;
 
+  @Output()
+  public pawnClicked = new EventEmitter<Pawn>();
+
   public get isStartField(): boolean {
     return this.field instanceof StartField;
   }
@@ -20,9 +24,11 @@ export class FieldComponent {
     return this.field instanceof NormalField;
   }
 
-  public get index(): string {
-    return this.field instanceof NormalField
-      ? `${(this.field as NormalField).index}`
-      : '';
+  public onClickPawn(): void {
+    console.log(
+      `%cBijoya field.component.ts[ln:28] onClickPawn`,
+      'color: orange'
+    );
+    this.pawnClicked.emit(this.field?.pawn);
   }
 }

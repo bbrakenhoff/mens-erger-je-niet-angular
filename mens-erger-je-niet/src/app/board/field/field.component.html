@@ -1,4 +1,5 @@
 <div
+  id="test-field"
   class="field"
   *ngIf="field"
   [ngClass]="
@@ -10,10 +11,11 @@
   [class.normal-field]="isNormalField"
 >
   <div
+    (click)="onClickPawn()"
+    id="test-pawn"
     *ngIf="field?.pawn"
     [ngClass]="field.pawn?.color | pawnColor: 'bg'"
     class="pawn"
   ></div>
-  <!-- <span>{{ index }}</span> -->
 </div>
 <div class="placeholder-field" *ngIf="!field"></div>

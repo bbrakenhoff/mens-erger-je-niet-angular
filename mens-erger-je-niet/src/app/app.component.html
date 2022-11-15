@@ -32,7 +32,10 @@
   <div class="col">
     <div class="card border-top-0" style="border-radius: 0">
       <div class="card-body">
-        <app-board [board]="game.board"></app-board>
+        <app-board
+          [board]="game.board"
+          (pawnClicked)="onClickPawn($event)"
+        ></app-board>
       </div>
     </div>
   </div>

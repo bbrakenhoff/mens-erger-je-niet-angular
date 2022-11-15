@@ -1,4 +1,6 @@
+import { DebugElement } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { PawnColorPipe } from 'app/pawn-color.pipe';
 import { Board } from 'models/board';
 import { BoardComponent } from './board.component';
@@ -21,5 +23,14 @@ describe('BoardComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should have fields that represent the board together', () => {
+  //   const fieldComponents = fixture.debugElement.queryAll(By.css('app-field'));
+  //   expect(fieldComponents.length).toBe(121);
+  // const nonEmptyFieldComponent=  fieldComponents.map((fieldComponent) => fieldComponent.nativeElement as HTMLElement)
+  //   .filter((nativeFieldComponent)=>nativeFieldComponent.hasAttribute('[field]'))
+
+    // expect()
   });
 });
