@@ -1,5 +1,5 @@
 import { Board } from './board';
-import { allColors, Color } from './color';
+import { allColors } from './color';
 import { Dice } from './dice';
 import { FirstPlayerDeterminer } from './first-player-determiner';
 import { Pawn } from './pawn';
@@ -29,26 +29,27 @@ export class Game {
     return this.players[this.currentPlayerIndex];
   }
 
-  private createPawns(): Map<Color, Pawn[]> {
-    const allPawnsInGame = new Map<Color, Pawn[]>();
+  private static createPawns(): readonly Pawn[][] {
+    const allPawnsInGame: Pawn[][] = [];
     allColors.forEach((color) => {
       const pawns = [];
       for (let i = 0; i < 4; i++) {
         pawns.push(new Pawn(color));
       }
-      allPawnsInGame.set(color, pawns);
+      allPawnsInGame.push(pawns);
     });
 
     return allPawnsInGame;
   }
 
   private letPlayersPutPawnsOnHomeFields(): void {
-    const allPawnsInGame = this.createPawns();
-    this.players.forEach((player, i) => {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      player.pawns.push(...allPawnsInGame.get(allColors[i])!);
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      player.putPawnsOnHomeFields(this.board.homeFields.get(allColors[i])!);
+    const allPawnsInGame: readonly Pawn[][] = Game.createPawns();
+    allPawnsInGame.forEach((pawns: Pawn[], i) => {
+      const matchingHomeFields = this.board.getFieldGroupByColor(
+        pawns[0].color
+      ).homeFields;
+      this.players[i].pawns.push(...pawns);
+      this.players[i].putPawnsOnHomeFields(matchingHomeFields);
     });
   }
 

@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Color } from './color';
+import { FieldGroup } from './field-group';
 import { HomeField } from './fields/home-field';
 import { FirstPlayerDeterminer } from './first-player-determiner';
 import { Game } from './game';
@@ -39,6 +39,7 @@ describe('Game', () => {
     firstPlayerIndexSpy: jasmine.Spy<(this: FirstPlayerDeterminer) => number>;
   };
   let playersSpies: PlayerSpy[];
+  let boardSpy: jasmine.Spy<(color: Color) => FieldGroup>;
 
   let game: Game;
 
@@ -72,6 +73,8 @@ describe('Game', () => {
       playersSpies.map((playerSpy) => playerSpy.player),
       firstPlayerDeterminerSpy.firsPlayerDeterminer
     );
+
+    boardSpy = spyOn(game.board, 'getFieldGroupByColor');
   });
 
   describe('constructor()', () => {
@@ -97,9 +100,23 @@ describe('Game', () => {
     });
 
     it('should let players put pawns on home fields', () => {
-      game.players.forEach((player) => {
-        expect(player.putPawnsOnHomeFields).toHaveBeenCalled();
-      });
+      boardSpy.and.callThrough();
+
+      expect(game.players[0].putPawnsOnHomeFields).toHaveBeenCalledWith(
+        game.board.fieldGroups[0].homeFields
+      );
+
+      expect(game.players[1].putPawnsOnHomeFields).toHaveBeenCalledWith(
+        game.board.fieldGroups[1].homeFields
+      );
+
+      expect(game.players[2].putPawnsOnHomeFields).toHaveBeenCalledWith(
+        game.board.fieldGroups[2].homeFields
+      );
+
+      expect(game.players[3].putPawnsOnHomeFields).toHaveBeenCalledWith(
+        game.board.fieldGroups[3].homeFields
+      );
     });
   });
 

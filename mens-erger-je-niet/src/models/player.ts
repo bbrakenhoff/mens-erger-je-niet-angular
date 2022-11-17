@@ -30,7 +30,7 @@ export class Player {
     return homeFields.find((homeField) => !homeField.pawn)!;
   }
 
-  public putPawnsOnHomeFields(homeFields: HomeField[]): void {
+  public putPawnsOnHomeFields(homeFields: readonly HomeField[]): void {
     this.pawns.forEach((pawn, i) => {
       pawn.moveTo(homeFields[i]);
     });

@@ -1,69 +1,69 @@
 <div class="board">
   <!-- row 0 -->
   <app-field
-    [field]="board.homeFields.get(Color.Blue)![0]"
+    [field]="board.getFieldGroupByColor(Color.Blue).homeFields[0]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.homeFields.get(Color.Blue)![1]"
-    (pawnClicked)="onClickPawn($event)"
-  ></app-field>
-  <app-field></app-field>
-  <app-field></app-field>
-  <app-field
-    [field]="board.normalFields.get(Color.Blue)![7]"
-    (pawnClicked)="onClickPawn($event)"
-  ></app-field>
-  <app-field
-    [field]="board.normalFields.get(Color.Blue)![8]"
-    (pawnClicked)="onClickPawn($event)"
-  ></app-field>
-  <app-field
-    [field]="board.startFields.get(Color.Green)!"
+    [field]="board.getFieldGroupByColor(Color.Blue).homeFields[1]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field></app-field>
   <app-field></app-field>
   <app-field
-    [field]="board.homeFields.get(Color.Green)![0]"
+    [field]="board.getFieldGroupByColor(Color.Blue).normalFields[7]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.homeFields.get(Color.Green)![1]"
+    [field]="board.getFieldGroupByColor(Color.Blue).normalFields[8]"
+    (pawnClicked)="onClickPawn($event)"
+  ></app-field>
+  <app-field
+    [field]="board.getFieldGroupByColor(Color.Green).startField"
+    (pawnClicked)="onClickPawn($event)"
+  ></app-field>
+  <app-field></app-field>
+  <app-field></app-field>
+  <app-field
+    [field]="board.getFieldGroupByColor(Color.Green).homeFields[0]"
+    (pawnClicked)="onClickPawn($event)"
+  ></app-field>
+  <app-field
+    [field]="board.getFieldGroupByColor(Color.Green).homeFields[1]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
 
   <!-- row 01 -->
   <app-field
-    [field]="board.homeFields.get(Color.Blue)![2]"
+    [field]="board.getFieldGroupByColor(Color.Blue).homeFields[2]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.homeFields.get(Color.Blue)![3]"
-    (pawnClicked)="onClickPawn($event)"
-  ></app-field>
-  <app-field></app-field>
-  <app-field></app-field>
-  <app-field
-    [field]="board.normalFields.get(Color.Blue)![6]"
-    (pawnClicked)="onClickPawn($event)"
-  ></app-field>
-  <app-field
-    [field]="board.landingFields.get(Color.Green)![0]"
-    (pawnClicked)="onClickPawn($event)"
-  ></app-field>
-  <app-field
-    [field]="board.normalFields.get(Color.Green)![0]"
+    [field]="board.getFieldGroupByColor(Color.Blue).homeFields[3]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field></app-field>
   <app-field></app-field>
   <app-field
-    [field]="board.homeFields.get(Color.Green)![2]"
+    [field]="board.getFieldGroupByColor(Color.Blue).normalFields[6]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.homeFields.get(Color.Green)![3]"
+    [field]="board.getFieldGroupByColor(Color.Green).landingFields[0]"
+    (pawnClicked)="onClickPawn($event)"
+  ></app-field>
+  <app-field
+    [field]="board.getFieldGroupByColor(Color.Green).normalFields[0]"
+    (pawnClicked)="onClickPawn($event)"
+  ></app-field>
+  <app-field></app-field>
+  <app-field></app-field>
+  <app-field
+    [field]="board.getFieldGroupByColor(Color.Green).homeFields[2]"
+    (pawnClicked)="onClickPawn($event)"
+  ></app-field>
+  <app-field
+    [field]="board.getFieldGroupByColor(Color.Green).homeFields[3]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
 
@@ -73,15 +73,15 @@
   <app-field></app-field>
   <app-field></app-field>
   <app-field
-    [field]="board.normalFields.get(Color.Blue)![5]"
+    [field]="board.getFieldGroupByColor(Color.Blue).normalFields[5]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.landingFields.get(Color.Green)![1]"
+    [field]="board.getFieldGroupByColor(Color.Green).landingFields[1]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.normalFields.get(Color.Green)![1]"
+    [field]="board.getFieldGroupByColor(Color.Green).normalFields[1]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field></app-field>
@@ -95,15 +95,15 @@
   <app-field></app-field>
   <app-field></app-field>
   <app-field
-    [field]="board.normalFields.get(Color.Blue)![4]"
+    [field]="board.getFieldGroupByColor(Color.Blue).normalFields[4]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.landingFields.get(Color.Green)![2]"
+    [field]="board.getFieldGroupByColor(Color.Green).landingFields[2]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.normalFields.get(Color.Green)![2]"
+    [field]="board.getFieldGroupByColor(Color.Green).normalFields[2]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field></app-field>
@@ -113,138 +113,138 @@
 
   <!-- row 04 -->
   <app-field
-    [field]="board.startFields.get(Color.Blue)"
+    [field]="board.getFieldGroupByColor(Color.Blue).startField"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.normalFields.get(Color.Blue)![0]"
+    [field]="board.getFieldGroupByColor(Color.Blue).normalFields[0]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.normalFields.get(Color.Blue)![1]"
+    [field]="board.getFieldGroupByColor(Color.Blue).normalFields[1]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.normalFields.get(Color.Blue)![2]"
+    [field]="board.getFieldGroupByColor(Color.Blue).normalFields[2]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.normalFields.get(Color.Blue)![3]"
+    [field]="board.getFieldGroupByColor(Color.Blue).normalFields[3]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.landingFields.get(Color.Green)![3]"
+    [field]="board.getFieldGroupByColor(Color.Green).landingFields[3]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.normalFields.get(Color.Green)![3]"
+    [field]="board.getFieldGroupByColor(Color.Green).normalFields[3]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.normalFields.get(Color.Green)![4]"
+    [field]="board.getFieldGroupByColor(Color.Green).normalFields[4]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.normalFields.get(Color.Green)![5]"
+    [field]="board.getFieldGroupByColor(Color.Green).normalFields[5]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.normalFields.get(Color.Green)![6]"
+    [field]="board.getFieldGroupByColor(Color.Green).normalFields[6]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.normalFields.get(Color.Green)![7]"
+    [field]="board.getFieldGroupByColor(Color.Green).normalFields[7]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
 
   <!-- row 05 -->
 
   <app-field
-    [field]="board.normalFields.get(Color.Yellow)![8]"
+    [field]="board.getFieldGroupByColor(Color.Yellow).normalFields[8]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.landingFields.get(Color.Blue)![0]"
+    [field]="board.getFieldGroupByColor(Color.Blue).landingFields[0]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.landingFields.get(Color.Blue)![1]"
+    [field]="board.getFieldGroupByColor(Color.Blue).landingFields[1]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.landingFields.get(Color.Blue)![2]"
+    [field]="board.getFieldGroupByColor(Color.Blue).landingFields[2]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.landingFields.get(Color.Blue)![3]"
+    [field]="board.getFieldGroupByColor(Color.Blue).landingFields[3]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field></app-field>
   <app-field
-    [field]="board.landingFields.get(Color.Red)![0]"
+    [field]="board.getFieldGroupByColor(Color.Red).landingFields[0]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.landingFields.get(Color.Red)![1]"
+    [field]="board.getFieldGroupByColor(Color.Red).landingFields[1]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.landingFields.get(Color.Red)![2]"
+    [field]="board.getFieldGroupByColor(Color.Red).landingFields[2]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.landingFields.get(Color.Red)![3]"
+    [field]="board.getFieldGroupByColor(Color.Red).landingFields[3]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.normalFields.get(Color.Green)![8]"
+    [field]="board.getFieldGroupByColor(Color.Green).normalFields[8]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
 
   <!-- row 06 -->
 
   <app-field
-    [field]="board.normalFields.get(Color.Yellow)![6]"
+    [field]="board.getFieldGroupByColor(Color.Yellow).normalFields[6]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.normalFields.get(Color.Yellow)![5]"
+    [field]="board.getFieldGroupByColor(Color.Yellow).normalFields[5]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.normalFields.get(Color.Yellow)![4]"
+    [field]="board.getFieldGroupByColor(Color.Yellow).normalFields[4]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.normalFields.get(Color.Yellow)![3]"
+    [field]="board.getFieldGroupByColor(Color.Yellow).normalFields[3]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.normalFields.get(Color.Yellow)![2]"
+    [field]="board.getFieldGroupByColor(Color.Yellow).normalFields[2]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.landingFields.get(Color.Yellow)![3]"
+    [field]="board.getFieldGroupByColor(Color.Yellow).landingFields[3]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.normalFields.get(Color.Red)![3]"
+    [field]="board.getFieldGroupByColor(Color.Red).normalFields[3]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.normalFields.get(Color.Red)![2]"
+    [field]="board.getFieldGroupByColor(Color.Red).normalFields[2]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.normalFields.get(Color.Red)![1]"
+    [field]="board.getFieldGroupByColor(Color.Red).normalFields[1]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.normalFields.get(Color.Red)![0]"
+    [field]="board.getFieldGroupByColor(Color.Red).normalFields[0]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.startFields.get(Color.Red)"
+    [field]="board.getFieldGroupByColor(Color.Red).startField"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
 
@@ -254,15 +254,15 @@
   <app-field></app-field>
   <app-field></app-field>
   <app-field
-    [field]="board.normalFields.get(Color.Yellow)![0]"
+    [field]="board.getFieldGroupByColor(Color.Yellow).normalFields[0]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.landingFields.get(Color.Yellow)![2]"
+    [field]="board.getFieldGroupByColor(Color.Yellow).landingFields[2]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.normalFields.get(Color.Red)![4]"
+    [field]="board.getFieldGroupByColor(Color.Red).normalFields[4]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field></app-field>
@@ -276,15 +276,15 @@
   <app-field></app-field>
   <app-field></app-field>
   <app-field
-    [field]="board.normalFields.get(Color.Yellow)![1]"
+    [field]="board.getFieldGroupByColor(Color.Yellow).normalFields[1]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.landingFields.get(Color.Yellow)![1]"
+    [field]="board.getFieldGroupByColor(Color.Yellow).landingFields[1]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.normalFields.get(Color.Red)![5]"
+    [field]="board.getFieldGroupByColor(Color.Red).normalFields[5]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field></app-field>
@@ -294,69 +294,69 @@
 
   <!-- row 10 -->
   <app-field
-    [field]="board.homeFields.get(Color.Yellow)![2]"
+    [field]="board.getFieldGroupByColor(Color.Yellow).homeFields[2]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.homeFields.get(Color.Yellow)![3]"
-    (pawnClicked)="onClickPawn($event)"
-  ></app-field>
-  <app-field></app-field>
-  <app-field></app-field>
-  <app-field
-    [field]="board.normalFields.get(Color.Yellow)![0]"
-    (pawnClicked)="onClickPawn($event)"
-  ></app-field>
-  <app-field
-    [field]="board.landingFields.get(Color.Yellow)![0]"
-    (pawnClicked)="onClickPawn($event)"
-  ></app-field>
-  <app-field
-    [field]="board.normalFields.get(Color.Red)![6]"
+    [field]="board.getFieldGroupByColor(Color.Yellow).homeFields[3]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field></app-field>
   <app-field></app-field>
   <app-field
-    [field]="board.homeFields.get(Color.Red)![0]"
+    [field]="board.getFieldGroupByColor(Color.Yellow).normalFields[0]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.homeFields.get(Color.Red)![1]"
+    [field]="board.getFieldGroupByColor(Color.Yellow).landingFields[0]"
+    (pawnClicked)="onClickPawn($event)"
+  ></app-field>
+  <app-field
+    [field]="board.getFieldGroupByColor(Color.Red).normalFields[6]"
+    (pawnClicked)="onClickPawn($event)"
+  ></app-field>
+  <app-field></app-field>
+  <app-field></app-field>
+  <app-field
+    [field]="board.getFieldGroupByColor(Color.Red).homeFields[0]"
+    (pawnClicked)="onClickPawn($event)"
+  ></app-field>
+  <app-field
+    [field]="board.getFieldGroupByColor(Color.Red).homeFields[1]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
 
   <!-- row 11 -->
   <app-field
-    [field]="board.homeFields.get(Color.Yellow)![2]"
+    [field]="board.getFieldGroupByColor(Color.Yellow).homeFields[2]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.homeFields.get(Color.Yellow)![3]"
-    (pawnClicked)="onClickPawn($event)"
-  ></app-field>
-  <app-field></app-field>
-  <app-field></app-field>
-  <app-field
-    [field]="board.startFields.get(Color.Yellow)"
-    (pawnClicked)="onClickPawn($event)"
-  ></app-field>
-  <app-field
-    [field]="board.normalFields.get(Color.Red)![8]"
-    (pawnClicked)="onClickPawn($event)"
-  ></app-field>
-  <app-field
-    [field]="board.normalFields.get(Color.Red)![7]"
+    [field]="board.getFieldGroupByColor(Color.Yellow).homeFields[3]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field></app-field>
   <app-field></app-field>
   <app-field
-    [field]="board.homeFields.get(Color.Red)![0]"
+    [field]="board.getFieldGroupByColor(Color.Yellow).startField"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
   <app-field
-    [field]="board.homeFields.get(Color.Red)![1]"
+    [field]="board.getFieldGroupByColor(Color.Red).normalFields[8]"
+    (pawnClicked)="onClickPawn($event)"
+  ></app-field>
+  <app-field
+    [field]="board.getFieldGroupByColor(Color.Red).normalFields[7]"
+    (pawnClicked)="onClickPawn($event)"
+  ></app-field>
+  <app-field></app-field>
+  <app-field></app-field>
+  <app-field
+    [field]="board.getFieldGroupByColor(Color.Red).homeFields[0]"
+    (pawnClicked)="onClickPawn($event)"
+  ></app-field>
+  <app-field
+    [field]="board.getFieldGroupByColor(Color.Red).homeFields[1]"
     (pawnClicked)="onClickPawn($event)"
   ></app-field>
 </div>
