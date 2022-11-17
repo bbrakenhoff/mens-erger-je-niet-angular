@@ -17,7 +17,10 @@ export class Player {
     return this.pawns[0].color;
   }
 
-  public putPawnOnHomeField(pawn: Pawn, homeFields: HomeField[]): void {
+  public putPawnOnHomeField(
+    pawn: Pawn,
+    homeFields: readonly HomeField[]
+  ): void {
     if (this.pawns.includes(pawn)) {
       pawn.moveTo(this.findEmptyHomeField(homeFields));
     } else {
@@ -25,7 +28,7 @@ export class Player {
     }
   }
 
-  private findEmptyHomeField(homeFields: HomeField[]): HomeField {
+  private findEmptyHomeField(homeFields: readonly HomeField[]): HomeField {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return homeFields.find((homeField) => !homeField.pawn)!;
   }

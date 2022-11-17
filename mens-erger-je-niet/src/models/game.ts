@@ -14,7 +14,7 @@ export class Game {
   private isCurrentPlayerPuttingPawnOnStartField = false;
 
   public constructor(
-    public readonly players: Player[] = [
+    public readonly players: readonly Player[] = [
       new Player(),
       new Player(),
       new Player(),

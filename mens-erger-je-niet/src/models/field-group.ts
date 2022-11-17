@@ -5,20 +5,20 @@ import { NormalField } from './fields/normal-field';
 import { StartField } from './fields/start-field';
 
 export class FieldGroup {
-  private readonly _homeFields: Array<HomeField> = [];
-  public get homeFields(): ReadonlyArray<HomeField> {
+  private readonly _homeFields: HomeField[] = [];
+  public get homeFields(): readonly HomeField[] {
     return this._homeFields;
   }
 
   private readonly _landingFields: LandingField[] = [];
-  public get landingFields(): ReadonlyArray<LandingField> {
+  public get landingFields(): readonly LandingField[] {
     return this._landingFields;
   }
 
   public readonly startField: StartField;
   private readonly _normalFields: NormalField[] = [];
 
-  public get normalFields(): ReadonlyArray<NormalField> {
+  public get normalFields(): readonly NormalField[] {
     return this._normalFields;
   }
 

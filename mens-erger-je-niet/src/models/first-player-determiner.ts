@@ -7,7 +7,7 @@ export class FirstPlayerDeterminer {
   }
 
   public determineFirstPlayer(
-    players: Player[],
+    players: readonly Player[],
     currentPlayerIndex: number
   ): void {
     const diceRollsOfPlayers = this.getDiceRollsOfPlayers(players);
@@ -39,7 +39,9 @@ export class FirstPlayerDeterminer {
     return currentPlayerIndex === 3;
   }
 
-  private isHighestDiceRollOnlyOnce(diceRollsOfPlayers: number[]): boolean {
+  private isHighestDiceRollOnlyOnce(
+    diceRollsOfPlayers: readonly number[]
+  ): boolean {
     return (
       diceRollsOfPlayers.filter(
         (diceRoll: number) =>
@@ -48,12 +50,12 @@ export class FirstPlayerDeterminer {
     );
   }
 
-  private getDiceRollsOfPlayers(players: Player[]): number[] {
+  private getDiceRollsOfPlayers(players: readonly Player[]): number[] {
     return players.map((player) => player.latestDiceRoll);
   }
 
   private getHighestDiceRollBetweenPlayers(
-    diceRollsOfPlayers: number[]
+    diceRollsOfPlayers: readonly number[]
   ): number {
     return Math.max(...diceRollsOfPlayers);
   }
