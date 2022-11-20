@@ -2,20 +2,20 @@
   id="test-field"
   class="field"
   *ngIf="field"
-  [ngClass]="
-    !isNormalField
-      ? (field.color | pawnColor: (isStartField ? 'border' : 'bg'))
-      : ''
-  "
+  [ngClass]="field.color | pawnColor"
   [class.start-field]="isStartField"
   [class.normal-field]="isNormalField"
+  [class.home-field]="isHomeField"
+  [class.landing-field]="isLandingField"
 >
-  <div
+  <!-- ? (field.color | pawnColor: (isStartField ? 'border' : 'bg')) -->
+  <button
     (click)="onClickPawn()"
     id="test-pawn"
+    [disabled]="isPawnEnabled"
     *ngIf="field?.pawn"
-    [ngClass]="field.pawn?.color | pawnColor: 'bg'"
+    [ngClass]="field.pawn?.color | pawnColor"
     class="pawn"
-  ></div>
+  ></button>
 </div>
 <div class="placeholder-field" *ngIf="!field"></div>

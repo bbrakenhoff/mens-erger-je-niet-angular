@@ -6,11 +6,10 @@ import { Color } from 'models/color';
 })
 export class PawnColorPipe implements PipeTransform {
   public transform(
-    value: Color | undefined,
-    property: 'bg' | 'fg' | 'border'
+    value: Color | undefined
   ): string {
     if (value) {
-      return `${property}-${value}`;
+      return `${value}`;
     }
     return '';
   }

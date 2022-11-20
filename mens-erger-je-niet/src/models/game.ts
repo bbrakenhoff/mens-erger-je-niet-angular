@@ -53,7 +53,7 @@ export class Game {
     });
   }
 
-  public nextPlayer(): void {
+  private nextPlayer(): void {
     this.currentPlayerIndex++;
 
     if (this.currentPlayerIndex === 4) {

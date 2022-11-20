@@ -33,7 +33,7 @@ describe('Game', () => {
   let firstPlayerDeterminerSpy: {
     firsPlayerDeterminer: FirstPlayerDeterminer;
     determineFirstPlayerSpy: jasmine.Spy<
-      (players: Player[], currentPlayerIndex: number) => void
+      (players: readonly Player[], currentPlayerIndex: number) => void
     >;
     isFirstPlayerAlreadyDeterminedSpy: jasmine.Spy<() => boolean>;
     firstPlayerIndexSpy: jasmine.Spy<(this: FirstPlayerDeterminer) => number>;
@@ -124,20 +124,6 @@ describe('Game', () => {
     it('should return the player at the current player index', () => {
       game.currentPlayerIndex = 1;
       expect(game.currentPlayer).toBe(game.players[1]);
-    });
-  });
-
-  describe('nextPlayer()', () => {
-    it('should update current player index', () => {
-      expect(game.currentPlayerIndex).toBe(0);
-      game.nextPlayer();
-      expect(game.currentPlayerIndex).toBe(1);
-      game.nextPlayer();
-      expect(game.currentPlayerIndex).toBe(2);
-      game.nextPlayer();
-      expect(game.currentPlayerIndex).toBe(3);
-      game.nextPlayer();
-      expect(game.currentPlayerIndex).toBe(0);
     });
   });
 

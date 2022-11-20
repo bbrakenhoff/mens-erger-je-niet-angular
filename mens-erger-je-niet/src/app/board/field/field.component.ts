@@ -1,5 +1,8 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Color } from 'models/color';
 import { Field } from 'models/fields/field';
+import { HomeField } from 'models/fields/home-field';
+import { LandingField } from 'models/fields/landing-field';
 import { NormalField } from 'models/fields/normal-field';
 import { StartField } from 'models/fields/start-field';
 import { Pawn } from 'models/pawn';
@@ -24,11 +27,23 @@ export class FieldComponent {
     return this.field instanceof NormalField;
   }
 
+  public get isHomeField(): boolean {
+    return this.field instanceof HomeField;
+  }
+
+  public get isLandingField(): boolean {
+    return this.field instanceof LandingField;
+  }
+
   public onClickPawn(): void {
     console.log(
       `%cBijoya field.component.ts[ln:28] onClickPawn`,
       'color: orange'
     );
     this.pawnClicked.emit(this.field?.pawn);
+  }
+
+  public get isPawnEnabled(): boolean {
+    return this.field?.pawn?.color !== Color.Blue;
   }
 }

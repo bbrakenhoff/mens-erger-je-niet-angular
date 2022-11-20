@@ -1,7 +1,17 @@
 <div class="container m-5 text-center">
+  <div class="row">
+    <div class="col">
+      <div class="card rounded-top rounded-0">
+        <div class="card-body">
+          <div class="card-title">First player determined!</div>
+          <div class="card-text">Player 1 may start</div>
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="row gx-0">
     <div class="col">
-      <div class="card h-100" style="border-radius: 0">
+      <div class="card h-100 border-top-0 rounded-0">
         <div class="card-body d-flex flex-column justify-content-center">
           <div class="card-text">Latest dice roll</div>
           <h1 class="card-title">{{ game.currentPlayer.latestDiceRoll }}</h1>
@@ -16,12 +26,12 @@
       </div>
     </div>
     <div class="col">
-      <div class="card h-100 border-start-0" style="border-radius: 0">
+      <div class="card h-100 border-start-0 border-top-0 rounded-0" >
         <div class="card-body d-flex flex-column justify-content-center">
           <div class="card-text">Current player</div>
           <h1
             class="card-title"
-            [ngClass]="game.currentPlayer.pawnColor | pawnColor: 'fg'"
+            [ngClass]="game.currentPlayer.pawnColor | pawnColor"
           >
             Player {{ game.currentPlayerIndex + 1 }}
           </h1>
