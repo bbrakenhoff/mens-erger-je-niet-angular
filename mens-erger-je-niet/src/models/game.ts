@@ -6,10 +6,8 @@ import { Pawn } from './pawn';
 import { Player } from './player';
 
 export class Game {
-  
-
   public currentPlayerIndex = 0;
-  private gameStarted = false;
+  private isDeterminingFirstPlayer = true;
   private isCurrentPlayerPuttingPawnOnStartField = false;
 
   public constructor(
@@ -75,7 +73,7 @@ export class Game {
   }
 
   private handleRulesFollowingDiceRoll(): void {
-    if (!this.gameStarted) {
+    if (this.isDeterminingFirstPlayer) {
       this.handleRulesFollowingDiceRollWhenGameNotStarted();
     } else if (this.currentPlayerShouldMovePawnOnStartField()) {
       this.currentPlayerMovePawnToStartField();
@@ -99,7 +97,7 @@ export class Game {
   private handleRulesFollowingDiceRollWhenGameNotStarted(): void {
     if (this.determineFirstPlayer()) {
       this.currentPlayerIndex = this.firstPlayerDeterminer.firstPlayerIndex;
-      this.gameStarted = true;
+      this.isDeterminingFirstPlayer = false;
     } else {
       this.nextPlayer();
     }

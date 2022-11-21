@@ -184,7 +184,7 @@ describe('Game', () => {
     });
   });
 
-  fdescribe('currentPlayerRollDice()', () => {
+  describe('currentPlayerRollDice()', () => {
     it('should give the turn to the next player when first player not yet determined', () => {
       game.currentPlayerRollDice();
       expect(playersSpies[0].rollDiceSpy).toHaveBeenCalledWith(diceSpy.dice);
