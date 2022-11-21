@@ -6,14 +6,15 @@ import { Pawn } from './pawn';
 import { Player } from './player';
 
 export class Game {
-  public readonly dice = new Dice();
-  public readonly board = new Board();
+  
 
   public currentPlayerIndex = 0;
   private gameStarted = false;
   private isCurrentPlayerPuttingPawnOnStartField = false;
 
   public constructor(
+    private readonly dice = new Dice(),
+    private readonly board = new Board(),
     public readonly players: readonly Player[] = [
       new Player(),
       new Player(),
