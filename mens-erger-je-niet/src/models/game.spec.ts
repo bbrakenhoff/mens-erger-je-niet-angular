@@ -1,4 +1,3 @@
-import { Observer } from 'rxjs';
 import { Board } from './board';
 import { Color } from './color';
 import { Dice } from './dice';
@@ -17,7 +16,7 @@ type PlayerSpy = {
   movePawnFromStartFieldSpy: jasmine.Spy<() => void>;
   movePawnSpy: jasmine.Spy<(pawn: Pawn) => Pawn | undefined>;
   latestDiceRollSpy: jasmine.Spy<(this: Player) => number>;
-  hasPawnsToMove: jasmine.Spy<() => boolean>;
+  hasPawnsToMoveSpy: jasmine.Spy<() => boolean>;
 };
 
 type FirstPlayerDeterminerSpy = {
@@ -29,13 +28,8 @@ type FirstPlayerDeterminerSpy = {
   firstPlayerIndexSpy: jasmine.Spy<(this: FirstPlayerDeterminer) => number>;
 };
 
-let currentPlayerObserverSy: {
-  currentPlayerObserver: Observer<Player>;
-  nextSpy: jasmine.Spy<(currentPlayer: Player) => void>;
-};
-
 describe('Game', () => {
-  const createPlayerSpy = (): PlayerSpy => {
+  const createPlayerSpy = (pawnColor: Color): PlayerSpy => {
     const player = new Player();
     return {
       player,
@@ -45,7 +39,7 @@ describe('Game', () => {
       movePawnFromStartFieldSpy: spyOn(player, 'movePawnFromStartField'),
       movePawnSpy: spyOn(player, 'movePawn'),
       latestDiceRollSpy: spyOnProperty(player, 'latestDiceRoll'),
-      hasPawnsToMove: spyOn(player, 'hasPawnsToMove'),
+      hasPawnsToMoveSpy: spyOn(player, 'hasPawnsToMove'),
     };
   };
   const createFirstPlayerDeterminerSpy = (): FirstPlayerDeterminerSpy => {
@@ -68,7 +62,7 @@ describe('Game', () => {
   };
 
   let firstPlayerDeterminerSpy: FirstPlayerDeterminerSpy;
-  let playersSpies: PlayerSpy[];
+  let playerSpies: PlayerSpy[];
 
   let diceSpy: { dice: Dice; rollSpy: jasmine.Spy<() => number> };
   let boardSpy: {
@@ -86,7 +80,7 @@ describe('Game', () => {
 
   const arrangeMovePawnToStartField = (): void => {
     arrangeDetermineFirstPlayer();
-    playersSpies[1].latestDiceRollSpy.and.returnValues(6);
+    playerSpies[1].latestDiceRollSpy.and.returnValues(6);
     game.currentPlayerRollDice();
   };
 
@@ -98,11 +92,11 @@ describe('Game', () => {
   let game: Game;
 
   beforeEach(() => {
-    playersSpies = [
-      createPlayerSpy(),
-      createPlayerSpy(),
-      createPlayerSpy(),
-      createPlayerSpy(),
+    playerSpies = [
+      createPlayerSpy(Color.Blue),
+      createPlayerSpy(Color.Green),
+      createPlayerSpy(Color.Red),
+      createPlayerSpy(Color.Yellow),
     ];
 
     firstPlayerDeterminerSpy = createFirstPlayerDeterminerSpy();
@@ -121,15 +115,11 @@ describe('Game', () => {
       'currentPlayerObserver',
       ['next', 'error', 'complete']
     );
-    currentPlayerObserverSy = {
-      currentPlayerObserver,
-      nextSpy: currentPlayerObserver.next,
-    };
 
     game = new Game(
       dice,
       board,
-      playersSpies.map((playerSpy) => playerSpy.player),
+      playerSpies.map((playerSpy) => playerSpy.player),
       firstPlayerDeterminerSpy.firsPlayerDeterminer
     );
   });
@@ -179,15 +169,14 @@ describe('Game', () => {
 
   describe('get currentPlayer()', () => {
     it('should return the player at the current player index', () => {
-      game.currentPlayerIndex = 1;
-      expect(game.currentPlayer).toBe(game.players[1]);
+      expect(game.currentPlayer).toBe(game.players[0]);
     });
   });
 
   describe('currentPlayerRollDice()', () => {
     it('should give the turn to the next player when first player not yet determined', () => {
       game.currentPlayerRollDice();
-      expect(playersSpies[0].rollDiceSpy).toHaveBeenCalledWith(diceSpy.dice);
+      expect(playerSpies[0].rollDiceSpy).toHaveBeenCalledWith(diceSpy.dice);
       expect(game.currentPlayerIndex).toBe(1);
     });
 
@@ -199,38 +188,47 @@ describe('Game', () => {
     it('should let player put a pawn on start field when dice roll is 6', () => {
       arrangeMovePawnToStartField();
 
-      expect(playersSpies[1].movePawnToStartFieldSpy).toHaveBeenCalled();
+      expect(playerSpies[1].movePawnToStartFieldSpy).toHaveBeenCalled();
       expect(game.currentPlayerIndex).toBe(1);
     });
 
     it('should let player move pawn from start field', () => {
       arrangeMovePawnFromStartField();
 
-      expect(playersSpies[1].movePawnFromStartFieldSpy).toHaveBeenCalled();
+      expect(playerSpies[1].movePawnFromStartFieldSpy).toHaveBeenCalled();
       expect(game.currentPlayerIndex).toBe(2);
     });
 
     it('should let the current player move a pawn', () => {
       arrangeMovePawnFromStartField();
 
-      // let other players have a turn
+      // player 2 roll dice
       game.currentPlayerRollDice();
-      expect(playersSpies[2].rollDiceSpy).toHaveBeenCalledWith(diceSpy.dice);
+      expect(playerSpies[2].rollDiceSpy).toHaveBeenCalledWith(diceSpy.dice);
       expect(game.currentPlayerIndex).toBe(3);
 
+      // player 3 roll dice
       game.currentPlayerRollDice();
-      expect(playersSpies[3].rollDiceSpy).toHaveBeenCalledWith(diceSpy.dice);
+      expect(playerSpies[3].rollDiceSpy).toHaveBeenCalledWith(diceSpy.dice);
       expect(game.currentPlayerIndex).toBe(0);
 
-      // back at first player, who has a pawn to move
+      // player 0 roll dice
       game.currentPlayerRollDice();
-      expect(playersSpies[0].rollDiceSpy).toHaveBeenCalledWith(diceSpy.dice);
+      expect(playerSpies[0].rollDiceSpy).toHaveBeenCalledWith(diceSpy.dice);
       expect(game.currentPlayerIndex).toBe(1);
 
-      // TODO: Bijoya - should have rolled the dice first
-      game.currentPlayerMovePawn(game.currentPlayer.pawns[0]);
+      // player 1 roll dice
+      playerSpies[1].hasPawnsToMoveSpy.and.returnValue(true);
+      game.currentPlayerRollDice();
+      expect(playerSpies[1].rollDiceSpy).toHaveBeenCalledWith(diceSpy.dice);
+      expect(game.currentPlayerIndex).toBe(1);
 
-      expect(playersSpies[1].movePawnSpy).toHaveBeenCalledWith(
+      playerSpies[1].player.pawns.push(new Pawn(Color.Blue));
+
+      // back at first player, who has a pawn to move
+      game.currentPlayerMovePawn(playerSpies[1].player.pawns[0]);
+      expect(game.currentPlayerIndex).toBe(2);
+      expect(playerSpies[1].movePawnSpy).toHaveBeenCalledWith(
         game.players[1].pawns[0]
       );
     });

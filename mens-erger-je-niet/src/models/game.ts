@@ -4,12 +4,20 @@ import { Dice } from './dice';
 import { FirstPlayerDeterminer } from './first-player-determiner';
 import { Pawn } from './pawn';
 import { Player } from './player';
+import { Turn } from './turn';
 
 export class Game {
-  public currentPlayerIndex = 0;
   private isDeterminingFirstPlayer = true;
-  private isCurrentPlayerPuttingPawnOnStartField = false;
 
+  private readonly turn: Turn = {
+    playerIndex: 0,
+    hasRolledDice: false,
+    isPlayerPuttingPawnOnStartField: false,
+  };
+
+  public get currentPlayerIndex(): number {
+    return this.turn.playerIndex;
+  }
   public constructor(
     private readonly dice = new Dice(),
     private readonly board = new Board(),
@@ -52,13 +60,15 @@ export class Game {
     });
   }
 
-  private nextPlayer(): void {
-    this.currentPlayerIndex++;
-
-    if (this.currentPlayerIndex === 4) {
-      this.currentPlayerIndex = 0;
-    }
+  private nextTurn(playerIndex: number = this.nextPlayerIndex()): void {
+    this.turn.playerIndex = playerIndex;
+    this.turn.hasRolledDice = false;
+    this.turn.isPlayerPuttingPawnOnStartField = false;
   }
+  private nextPlayerIndex(): number {
+    return this.turn.playerIndex + 1 === 4 ? 0 : this.turn.playerIndex + 1;
+  }
+
   private determineFirstPlayer(): boolean {
     this.firstPlayerDeterminer.determineFirstPlayer(
       this.players,
@@ -73,47 +83,49 @@ export class Game {
   }
 
   private handleRulesFollowingDiceRoll(): void {
+    this.turn.hasRolledDice = true;
     if (this.isDeterminingFirstPlayer) {
-      this.handleRulesFollowingDiceRollWhenGameNotStarted();
+      this.tryDeterminingFirstPlayer();
     } else if (this.currentPlayerShouldMovePawnOnStartField()) {
       this.currentPlayerMovePawnToStartField();
-    } else if (this.isCurrentPlayerPuttingPawnOnStartField) {
+    } else if (this.turn.isPlayerPuttingPawnOnStartField) {
       this.currentPlayerMovePawnFromStartField();
-      this.nextPlayer();
-    } else {
-      if (!this.currentPlayer.hasPawnsToMove()) {
-        this.nextPlayer();
-      }
+    } else if (!this.currentPlayer.hasPawnsToMove()) {
+      this.nextTurn();
     }
   }
 
   private currentPlayerShouldMovePawnOnStartField(): boolean {
     return (
-      !this.isCurrentPlayerPuttingPawnOnStartField &&
+      !this.turn.isPlayerPuttingPawnOnStartField &&
       this.currentPlayer.latestDiceRoll === 6
     );
   }
 
-  private handleRulesFollowingDiceRollWhenGameNotStarted(): void {
+  private tryDeterminingFirstPlayer(): void {
     if (this.determineFirstPlayer()) {
-      this.currentPlayerIndex = this.firstPlayerDeterminer.firstPlayerIndex;
+      this.nextTurn(this.firstPlayerDeterminer.firstPlayerIndex);
       this.isDeterminingFirstPlayer = false;
     } else {
-      this.nextPlayer();
+      this.nextTurn();
     }
   }
 
   private currentPlayerMovePawnToStartField(): void {
     this.currentPlayer.movePawnToStartField();
-    this.isCurrentPlayerPuttingPawnOnStartField = true;
+    this.turn.hasRolledDice = false;
+    this.turn.isPlayerPuttingPawnOnStartField = true;
   }
 
   private currentPlayerMovePawnFromStartField(): void {
     this.currentPlayer.movePawnFromStartField();
-    this.isCurrentPlayerPuttingPawnOnStartField = false;
+    this.nextTurn();
   }
 
   public currentPlayerMovePawn(pawn: Pawn): void {
-    this.currentPlayer.movePawn(pawn);
+    if (this.turn.hasRolledDice) {
+      this.currentPlayer.movePawn(pawn);
+      this.nextTurn();
+    }
   }
 }
