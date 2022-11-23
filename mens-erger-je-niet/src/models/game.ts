@@ -20,7 +20,7 @@ export class Game {
   }
   public constructor(
     private readonly dice = new Dice(),
-    private readonly board = new Board(),
+    public readonly board = new Board(),
     public readonly players: readonly Player[] = [
       new Player(),
       new Player(),
