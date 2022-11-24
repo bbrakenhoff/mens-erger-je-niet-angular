@@ -2,19 +2,18 @@
   id="test-field"
   class="field"
   *ngIf="field"
-  [ngClass]="field.color | pawnColor"
+  [ngClass]="field.color"
   [class.start-field]="isStartField"
   [class.normal-field]="isNormalField"
   [class.home-field]="isHomeField"
   [class.landing-field]="isLandingField"
 >
-  <!-- ? (field.color | pawnColor: (isStartField ? 'border' : 'bg')) -->
   <button
     (click)="onClickPawn()"
     id="test-pawn"
     [disabled]="isPawnEnabled"
     *ngIf="field?.pawn"
-    [ngClass]="field.pawn?.color | pawnColor"
+    [ngClass]="field.pawn?.color"
     class="pawn"
   ></button>
 </div>
