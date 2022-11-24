@@ -2,11 +2,9 @@ import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { RouterTestingModule } from '@angular/router/testing';
-import { Game } from 'models/game';
 import { AppComponent } from './app.component';
 import { BoardComponent } from './board/board.component';
 import { FieldComponent } from './board/field/field.component';
-import { PawnColorPipe } from './pawn-color.pipe';
 
 describe('AppComponent', () => {
   let fixture: ComponentFixture<AppComponent>;
@@ -15,8 +13,8 @@ describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [RouterTestingModule],
-      declarations: [AppComponent, PawnColorPipe,BoardComponent,FieldComponent],
-      schemas:[CUSTOM_ELEMENTS_SCHEMA]
+      declarations: [AppComponent, BoardComponent, FieldComponent],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA],
     }).compileComponents();
   });
 

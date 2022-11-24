@@ -1,7 +1,6 @@
 import { DebugElement } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { PawnColorPipe } from 'app/pawn-color.pipe';
 import { Color } from 'models/color';
 import { Field } from 'models/fields/field';
 import { HomeField } from 'models/fields/home-field';
@@ -30,7 +29,7 @@ describe('FieldComponent', () => {
     pawnSpy = new Pawn(Color.Yellow);
 
     await TestBed.configureTestingModule({
-      declarations: [FieldComponent, PawnColorPipe],
+      declarations: [FieldComponent],
     }).compileComponents();
 
     fixture = TestBed.createComponent(FieldComponent);

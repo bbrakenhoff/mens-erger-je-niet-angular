@@ -1,7 +1,4 @@
-import { DebugElement } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
-import { PawnColorPipe } from 'app/pawn-color.pipe';
 import { Board } from 'models/board';
 import { BoardComponent } from './board.component';
 import { FieldComponent } from './field/field.component';
@@ -12,7 +9,7 @@ describe('BoardComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [BoardComponent, FieldComponent, PawnColorPipe],
+      declarations: [BoardComponent, FieldComponent],
     }).compileComponents();
 
     fixture = TestBed.createComponent(BoardComponent);

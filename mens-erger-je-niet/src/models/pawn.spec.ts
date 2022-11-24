@@ -1,4 +1,5 @@
 import { Color } from './color';
+import { Field } from './fields/field';
 import { NormalField } from './fields/normal-field';
 import { StartField } from './fields/start-field';
 import { Pawn } from './pawn';
@@ -83,47 +84,47 @@ describe('Pawn', () => {
   });
 
   describe('moveToFieldAfter(steps)', () => {
-    let normalFields: NormalField[];
+    let fields: Field[];
     const steps = 5;
 
     beforeEach(() => {
-      normalFields = [
+      fields = [
+        new StartField(Color.Yellow),
         new NormalField(Color.Yellow, 0),
         new NormalField(Color.Yellow, 1),
         new NormalField(Color.Yellow, 2),
         new NormalField(Color.Yellow, 3),
         new NormalField(Color.Yellow, 4),
         new NormalField(Color.Yellow, 5),
-        new NormalField(Color.Yellow, 6),
       ];
 
-      normalFields.forEach((normalField, i) => {
-        if (i < normalFields.length - 2) {
-          normalField.next = normalFields[i + 1];
+      fields.forEach((field, i) => {
+        if (i < fields.length - 2) {
+          field.next = fields[i + 1];
         }
       });
 
-      normalFields[0].pawn = pawn;
-      pawn.field = normalFields[0];
+      fields[0].pawn = pawn;
+      pawn.field = fields[0];
     });
 
-    it('should go to the field in the given number of steps', () => {
+    fit('should go to the field in the given number of steps', () => {
       expect(pawn.moveToFieldAfter(steps)).toBeUndefined();
 
-      expect(pawn.field).toBe(normalFields[5]);
-      expect(normalFields[5].pawn).toBe(pawn);
-      expect(normalFields[0].pawn).toBeUndefined();
+      expect(pawn.field).toBe(fields[5]);
+      expect(fields[5].pawn).toBe(pawn);
+      expect(fields[0].pawn).toBeUndefined();
     });
 
     it('should beat another pawn when field already occupied', () => {
-      otherPawn.field = normalFields[5];
-      normalFields[5].pawn = otherPawn;
+      otherPawn.field = fields[4];
+      fields[4].pawn = otherPawn;
 
       expect(pawn.moveToFieldAfter(steps)).toBe(otherPawn);
 
-      expect(pawn.field).toBe(normalFields[5]);
-      expect(normalFields[5].pawn).toBe(pawn);
-      expect(normalFields[0].pawn).toBeUndefined();
+      expect(pawn.field).toBe(fields[4]);
+      expect(fields[4].pawn).toBe(pawn);
+      expect(fields[0].pawn).toBeUndefined();
     });
   });
 });
