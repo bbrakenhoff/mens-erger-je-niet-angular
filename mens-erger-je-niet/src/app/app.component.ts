@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { Color } from 'models/color';
 import { Game } from 'models/game';
 import { Pawn } from 'models/pawn';
 
@@ -10,6 +9,7 @@ import { Pawn } from 'models/pawn';
 })
 export class AppComponent {
   public readonly game = new Game();
+  public readonly gameEventMessage$ = this.game.gameEventMessage$;
 
   public onClickBtnRollDice(): void {
     this.game.currentPlayerRollDice();
@@ -21,20 +21,5 @@ export class AppComponent {
       'color: deeppink'
     );
     this.game.currentPlayerMovePawn(pawn);
-  }
-
-  public getColorClass(color?: Color): string {
-    switch (color) {
-      case Color.Blue:
-        return 'black';
-      case Color.Green:
-        return 'green';
-      case Color.Red:
-        return 'red';
-      case Color.Yellow:
-        return 'yellow';
-      default:
-        return '';
-    }
   }
 }

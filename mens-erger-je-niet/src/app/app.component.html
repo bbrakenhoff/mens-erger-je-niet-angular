@@ -3,8 +3,10 @@
     <div class="col">
       <div class="card rounded-top rounded-0">
         <div class="card-body">
-          <div class="card-title">First player determined!</div>
-          <div class="card-text">Player 1 may start</div>
+          <h4 class="card-title">
+            {{ (gameEventMessage$ | async)?.text }}
+          </h4>
+          <div class="card-text">{{ (gameEventMessage$ | async)?.subtext }}</div>
         </div>
       </div>
     </div>
@@ -26,13 +28,10 @@
       </div>
     </div>
     <div class="col">
-      <div class="card h-100 border-start-0 border-top-0 rounded-0" >
+      <div class="card h-100 border-start-0 border-top-0 rounded-0">
         <div class="card-body d-flex flex-column justify-content-center">
           <div class="card-text">Current player</div>
-          <h1
-            class="card-title"
-            [ngClass]="game.currentPlayer.pawnColor"
-          >
+          <h1 class="card-title" [ngClass]="game.currentPlayer.pawnColor">
             Player {{ game.currentPlayerIndex + 1 }}
           </h1>
         </div>
