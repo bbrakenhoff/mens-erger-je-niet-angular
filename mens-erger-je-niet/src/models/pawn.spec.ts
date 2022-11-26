@@ -108,7 +108,7 @@ describe('Pawn', () => {
       pawn.field = fields[0];
     });
 
-    fit('should go to the field in the given number of steps', () => {
+    it('should go to the field in the given number of steps', () => {
       expect(pawn.moveToFieldAfter(steps)).toBeUndefined();
 
       expect(pawn.field).toBe(fields[5]);

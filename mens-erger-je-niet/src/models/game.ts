@@ -1,26 +1,29 @@
-import { Observable, Subject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { GameEvent, GameEventInfo } from '../app/game-event-message';
 import { Board } from './board';
 import { allColors } from './color';
 import { Dice } from './dice';
 import { FirstPlayerDeterminer } from './first-player-determiner';
-import { GameEventMessage } from './game-event-message';
 import { Pawn } from './pawn';
 import { Player } from './player';
 import { Turn } from './turn';
 
 export class Game {
-  private readonly gameEventMessage: GameEventMessage = {
-    text: ``,
-    subtext: ``,
-  };
-  private readonly _gameEventMessage$$ = new Subject<GameEventMessage>();
-  public get gameEventMessage$(): Observable<GameEventMessage> {
-    return this._gameEventMessage$$.asObservable();
+  private readonly _gameEvent$$: BehaviorSubject<{
+    event: GameEvent;
+    info: GameEventInfo;
+  }>;
+  public get gameEvent$(): Observable<{
+    event: GameEvent;
+    info: GameEventInfo;
+  }> {
+    return this._gameEvent$$.asObservable();
   }
   private isDeterminingFirstPlayer = true;
 
   private readonly turn: Turn = {
     playerIndex: 0,
+    diceRoll:0,
     hasRolledDice: false,
     isPlayerPuttingPawnOnStartField: false,
   };
@@ -40,6 +43,16 @@ export class Game {
     private readonly firstPlayerDeterminer = new FirstPlayerDeterminer()
   ) {
     this.letPlayersPutPawnsOnHomeFields();
+
+    const gameNotStartedEvent = {
+      event: GameEvent.GameNotStartedYet,
+      info: {
+        currentPlayerIndex: this.turn.playerIndex,
+        latestDiceRoll: this.players[this.turn.playerIndex].latestDiceRoll,
+      } as GameEventInfo,
+    };
+    this._gameEvent$$ = new BehaviorSubject(gameNotStartedEvent);
+    this.updateGameEvent(GameEvent.GameNotStartedYet);
   }
 
   public get currentPlayer(): Player {
@@ -95,10 +108,6 @@ export class Game {
   }
 
   private handleRulesFollowingDiceRoll(): void {
-    this.gameEventMessage.text = `Player ${
-      this.currentPlayerIndex + 1
-    } rolled ${this.currentPlayer.latestDiceRoll}`;
-
     this.turn.hasRolledDice = true;
     if (this.isDeterminingFirstPlayer) {
       this.tryDeterminingFirstPlayer();
@@ -107,15 +116,9 @@ export class Game {
     } else if (this.turn.isPlayerPuttingPawnOnStartField) {
       this.currentPlayerMovePawnFromStartField();
     } else if (!this.currentPlayer.hasPawnsToMove()) {
-      // TODO: Bijoya - NoPawnsToMove
-      this.gameEventMessage.subtext = `Player ${
-        this.currentPlayerIndex + 1
-      } does not have pawns to move; player ${
-        this.nextPlayerIndex() + 1
-      } may roll the dice`;
+      this.updateGameEvent(GameEvent.CurrentPlayerHasNoPawnsToMove);
       this.nextTurn();
     }
-    this.updateGameEventMessage();
   }
 
   private currentPlayerShouldMovePawnOnStartField(): boolean {
@@ -127,25 +130,30 @@ export class Game {
 
   private tryDeterminingFirstPlayer(): void {
     if (this.determineFirstPlayer()) {
-      // TODO: Bijoya - FirstPlayerDetermined
-      this.gameEventMessage.subtext = `Player ${
-        this.firstPlayerDeterminer.firstPlayerIndex + 1
-      } may start!`;
+      this.updateGameEvent(
+        GameEvent.FirstPlayerDetermined,
+        this.firstPlayerDeterminer.firstPlayerIndex
+      );
       this.nextTurn(this.firstPlayerDeterminer.firstPlayerIndex);
       this.isDeterminingFirstPlayer = false;
     } else {
-      // TODO: Bijoya - FirstPlayerNotYetDetermined
-      this.gameEventMessage.subtext = `First player not yet determined, Player ${
-        this.nextPlayerIndex() + 1
-      } may roll the dice`;
+      this.updateGameEvent(GameEvent.DetermineFirstPlayerFailed);
       this.nextTurn();
     }
-
-    this.updateGameEventMessage();
   }
 
-  private updateGameEventMessage(): void {
-    this._gameEventMessage$$.next(this.gameEventMessage);
+  private updateGameEvent(
+    event: GameEvent,
+    nextPlayerIndex = this.nextPlayerIndex()
+  ): void {
+    this._gameEvent$$.next({
+      event,
+      info: {
+        currentPlayerIndex: this.turn.playerIndex,
+        nextPlayerIndex,
+        latestDiceRoll: this.players[this.turn.playerIndex].latestDiceRoll,
+      },
+    });
   }
 
   private currentPlayerMovePawnToStartField(): void {
@@ -153,38 +161,19 @@ export class Game {
     this.turn.hasRolledDice = false;
     this.turn.isPlayerPuttingPawnOnStartField = true;
 
-    // TODO: Bijoya - PlayerMovedPawnToStartField
-    this.gameEventMessage.text = `Player ${
-      this.currentPlayerIndex + 1
-    } rolled 6 and moved a pawn to start`;
-    this.gameEventMessage.subtext = `Player ${
-      this.currentPlayerIndex + 1
-    } may roll the dice again`;
+    this.updateGameEvent(GameEvent.CurrentPlayerMovedPawnToStartField);
   }
 
   private currentPlayerMovePawnFromStartField(): void {
     this.currentPlayer.movePawnFromStartField();
-    // TODO: Bijoya - PlayerMovedPawnFromStartField
-    this.gameEventMessage.text = `Player ${
-      this.currentPlayerIndex + 1
-    } rolled ${this.currentPlayer.latestDiceRoll} and moved the pawn that was on start`;
-    this.gameEventMessage.subtext = `Player ${
-      this.currentPlayerIndex + 1
-    } may roll the dice again`;
+    this.updateGameEvent(GameEvent.CurrentPlayerMovedPawnFromStartField);
     this.nextTurn();
   }
 
   public currentPlayerMovePawn(pawn: Pawn): void {
     if (this.turn.hasRolledDice) {
       this.currentPlayer.movePawn(pawn);
-      // TODO: Bijoya - PlayerMovedPawn
-      this.gameEventMessage.text = `Player ${
-        this.currentPlayerIndex + 1
-      } moved a pawn`;
-      this.gameEventMessage.subtext = `Player ${
-        this.nextPlayerIndex() + 1
-      } may roll the dice`;
-      this.updateGameEventMessage();
+      this.updateGameEvent(GameEvent.CurrentPlayerMovedPawn);
       this.nextTurn();
     }
   }

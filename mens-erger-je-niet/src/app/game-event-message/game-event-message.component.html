@@ -1,0 +1,66 @@
+<div class="card rounded-top rounded-0" [ngSwitch]="event">
+  <div
+    class="card-body"
+    *ngSwitchCase="GameEvent.CurrentPlayerHasNoPawnsToMove"
+  >
+    <h4 class="card-title">
+      Player {{ info.currentPlayerIndex + 1 }} rolled {{ info.latestDiceRoll }}
+    </h4>
+    <div class="card-body">
+      Player $c does not have pawns to move, player
+      {{ info.nextPlayerIndex! + 1 }} may roll the dice!
+    </div>
+  </div>
+  <div class="card-body" *ngSwitchCase="GameEvent.CurrentPlayerMovedPawn">
+    <h4 class="card-title">
+      Player {{ info.currentPlayerIndex + 1 }} rolled
+      {{ info.latestDiceRoll }} and moved a pawn
+    </h4>
+    <div class="card-body">Player $n may roll the dice!</div>
+  </div>
+  <div
+    class="card-body"
+    *ngSwitchCase="GameEvent.CurrentPlayerMovedPawnFromStartField"
+  >
+    <h4 class="card-title">
+      Player {{ info.currentPlayerIndex + 1 }} rolled
+      {{ info.latestDiceRoll }} and moved the pawn that was on start
+    </h4>
+    <div class="card-body">
+      Player {{ info.nextPlayerIndex! + 1 }} may roll the dice!
+    </div>
+  </div>
+  <div
+    class="card-body"
+    *ngSwitchCase="GameEvent.CurrentPlayerMovedPawnToStartField"
+  >
+    <h4 class="card-title">
+      Player {{ info.currentPlayerIndex + 1 }} rolled 6 and moved a pawn to
+      start
+    </h4>
+    <div class="card-body">
+      Player {{ info.currentPlayerIndex + 1 }} may roll the dice again
+    </div>
+  </div>
+  <div class="card-body" *ngSwitchCase="GameEvent.DetermineFirstPlayerFailed">
+    <h4 class="card-title">
+      Player {{ info.currentPlayerIndex + 1 }} rolled {{ info.latestDiceRoll }}
+    </h4>
+    <div class="card-body">
+      First player not yet determined, player
+      {{ info.nextPlayerIndex! + 1 }} may roll the dice
+    </div>
+  </div>
+  <div class="card-body" *ngSwitchCase="GameEvent.FirstPlayerDetermined">
+    <h4 class="card-title">
+      Player {{ info.currentPlayerIndex + 1 }} rolled {{ info.latestDiceRoll }}
+    </h4>
+    <div class="card-body">
+      Player {{ info.nextPlayerIndex! + 1 }} may start!
+    </div>
+  </div>
+  <div class="card-body" *ngSwitchCase="GameEvent.GameNotStartedYet">
+    <h4 class="card-title">Game about to start!</h4>
+    <div class="card-body">Player 1 may roll the dice!</div>
+  </div>
+</div>

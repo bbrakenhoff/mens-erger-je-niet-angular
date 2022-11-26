@@ -4,6 +4,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BoardComponent } from './board/board.component';
 import { FieldComponent } from './board/field/field.component';
+import { GameEventMessageComponent } from './game-event-message/game-event-message.component';
 
 
 @NgModule({
@@ -11,6 +12,7 @@ import { FieldComponent } from './board/field/field.component';
     AppComponent,
     BoardComponent,
     FieldComponent,
+    GameEventMessageComponent,
   ],
   imports: [
     BrowserModule,

@@ -1,14 +1,11 @@
 <div class="container m-5 text-center">
   <div class="row">
     <div class="col">
-      <div class="card rounded-top rounded-0">
-        <div class="card-body">
-          <h4 class="card-title">
-            {{ (gameEventMessage$ | async)?.text }}
-          </h4>
-          <div class="card-text">{{ (gameEventMessage$ | async)?.subtext }}</div>
-        </div>
-      </div>
+      <app-game-event-message
+        *ngIf="gameEventMessage$ | async as gameEventMessage"
+        [event]="gameEventMessage.event"
+        [info]="gameEventMessage.info"
+      ></app-game-event-message>
     </div>
   </div>
   <div class="row gx-0">
@@ -16,7 +13,18 @@
       <div class="card h-100 border-top-0 rounded-0">
         <div class="card-body d-flex flex-column justify-content-center">
           <div class="card-text">Latest dice roll</div>
-          <h1 class="card-title">{{ game.currentPlayer.latestDiceRoll }}</h1>
+          <h1
+            class="card-title"
+            *ngIf="
+              (gameEventMessage$ | async)!.info.latestDiceRoll > 0;
+              else emptyDiceRoll
+            "
+          >
+            {{ (gameEventMessage$ | async)!.info.latestDiceRoll }}
+          </h1>
+          <ng-template #emptyDiceRoll>
+            <h1 class="card-title">-</h1>
+          </ng-template>
           <button
             (click)="onClickBtnRollDice()"
             id="btn-rollDice"

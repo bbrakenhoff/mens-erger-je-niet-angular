@@ -9,7 +9,7 @@ import { Pawn } from 'models/pawn';
 })
 export class AppComponent {
   public readonly game = new Game();
-  public readonly gameEventMessage$ = this.game.gameEventMessage$;
+  public readonly gameEventMessage$ = this.game.gameEvent$;
 
   public onClickBtnRollDice(): void {
     this.game.currentPlayerRollDice();
