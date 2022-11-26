@@ -107,14 +107,15 @@ export class Game {
     } else if (this.turn.isPlayerPuttingPawnOnStartField) {
       this.currentPlayerMovePawnFromStartField();
     } else if (!this.currentPlayer.hasPawnsToMove()) {
+      // TODO: Bijoya - NoPawnsToMove
       this.gameEventMessage.subtext = `Player ${
         this.currentPlayerIndex + 1
       } does not have pawns to move; player ${
         this.nextPlayerIndex() + 1
       } may roll the dice`;
-      this.updateGameEventMessage();
       this.nextTurn();
     }
+    this.updateGameEventMessage();
   }
 
   private currentPlayerShouldMovePawnOnStartField(): boolean {
@@ -126,12 +127,14 @@ export class Game {
 
   private tryDeterminingFirstPlayer(): void {
     if (this.determineFirstPlayer()) {
+      // TODO: Bijoya - FirstPlayerDetermined
       this.gameEventMessage.subtext = `Player ${
         this.firstPlayerDeterminer.firstPlayerIndex + 1
       } may start!`;
       this.nextTurn(this.firstPlayerDeterminer.firstPlayerIndex);
       this.isDeterminingFirstPlayer = false;
     } else {
+      // TODO: Bijoya - FirstPlayerNotYetDetermined
       this.gameEventMessage.subtext = `First player not yet determined, Player ${
         this.nextPlayerIndex() + 1
       } may roll the dice`;
@@ -149,30 +152,32 @@ export class Game {
     this.currentPlayer.movePawnToStartField();
     this.turn.hasRolledDice = false;
     this.turn.isPlayerPuttingPawnOnStartField = true;
+
+    // TODO: Bijoya - PlayerMovedPawnToStartField
     this.gameEventMessage.text = `Player ${
       this.currentPlayerIndex + 1
-    } moved a pawn to start`;
+    } rolled 6 and moved a pawn to start`;
     this.gameEventMessage.subtext = `Player ${
       this.currentPlayerIndex + 1
     } may roll the dice again`;
-    this.updateGameEventMessage();
   }
 
   private currentPlayerMovePawnFromStartField(): void {
     this.currentPlayer.movePawnFromStartField();
+    // TODO: Bijoya - PlayerMovedPawnFromStartField
     this.gameEventMessage.text = `Player ${
       this.currentPlayerIndex + 1
-    } moved a pawn on start`;
+    } rolled ${this.currentPlayer.latestDiceRoll} and moved the pawn that was on start`;
     this.gameEventMessage.subtext = `Player ${
       this.currentPlayerIndex + 1
     } may roll the dice again`;
-    this.updateGameEventMessage();
     this.nextTurn();
   }
 
   public currentPlayerMovePawn(pawn: Pawn): void {
     if (this.turn.hasRolledDice) {
       this.currentPlayer.movePawn(pawn);
+      // TODO: Bijoya - PlayerMovedPawn
       this.gameEventMessage.text = `Player ${
         this.currentPlayerIndex + 1
       } moved a pawn`;
