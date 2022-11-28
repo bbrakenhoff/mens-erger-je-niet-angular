@@ -23,7 +23,6 @@ export class Game {
 
   private readonly turn: Turn = {
     playerIndex: 0,
-    diceRoll:0,
     hasRolledDice: false,
     isPlayerPuttingPawnOnStartField: false,
   };
@@ -55,6 +54,20 @@ export class Game {
     this.updateGameEvent(GameEvent.GameNotStartedYet);
   }
 
+  private updateGameEvent(
+    event: GameEvent,
+    nextPlayerIndex = this.nextPlayerIndex()
+  ): void {
+    this._gameEvent$$.next({
+      event,
+      info: {
+        currentPlayerIndex: this.turn.playerIndex,
+        nextPlayerIndex,
+        latestDiceRoll: this.players[this.turn.playerIndex].latestDiceRoll,
+      },
+    });
+  }
+
   public get currentPlayer(): Player {
     return this.players[this.currentPlayerIndex];
   }
@@ -83,23 +96,8 @@ export class Game {
     });
   }
 
-  private nextTurn(playerIndex: number = this.nextPlayerIndex()): void {
-    this.turn.playerIndex = playerIndex;
-    this.turn.hasRolledDice = false;
-    this.turn.isPlayerPuttingPawnOnStartField = false;
-  }
-
   private nextPlayerIndex(): number {
     return this.turn.playerIndex + 1 === 4 ? 0 : this.turn.playerIndex + 1;
-  }
-
-  private determineFirstPlayer(): boolean {
-    this.firstPlayerDeterminer.determineFirstPlayer(
-      this.players,
-      this.currentPlayerIndex
-    );
-
-    return this.firstPlayerDeterminer.isFirstPlayerAlreadyDetermined();
   }
 
   public currentPlayerRollDice(): void {
@@ -121,13 +119,6 @@ export class Game {
     }
   }
 
-  private currentPlayerShouldMovePawnOnStartField(): boolean {
-    return (
-      !this.turn.isPlayerPuttingPawnOnStartField &&
-      this.currentPlayer.latestDiceRoll === 6
-    );
-  }
-
   private tryDeterminingFirstPlayer(): void {
     if (this.determineFirstPlayer()) {
       this.updateGameEvent(
@@ -142,18 +133,26 @@ export class Game {
     }
   }
 
-  private updateGameEvent(
-    event: GameEvent,
-    nextPlayerIndex = this.nextPlayerIndex()
-  ): void {
-    this._gameEvent$$.next({
-      event,
-      info: {
-        currentPlayerIndex: this.turn.playerIndex,
-        nextPlayerIndex,
-        latestDiceRoll: this.players[this.turn.playerIndex].latestDiceRoll,
-      },
-    });
+  private determineFirstPlayer(): boolean {
+    this.firstPlayerDeterminer.determineFirstPlayer(
+      this.players,
+      this.currentPlayerIndex
+    );
+
+    return this.firstPlayerDeterminer.isFirstPlayerAlreadyDetermined();
+  }
+
+  private nextTurn(playerIndex: number = this.nextPlayerIndex()): void {
+    this.turn.playerIndex = playerIndex;
+    this.turn.hasRolledDice = false;
+    this.turn.isPlayerPuttingPawnOnStartField = false;
+  }
+
+  private currentPlayerShouldMovePawnOnStartField(): boolean {
+    return (
+      !this.turn.isPlayerPuttingPawnOnStartField &&
+      this.currentPlayer.latestDiceRoll === 6
+    );
   }
 
   private currentPlayerMovePawnToStartField(): void {

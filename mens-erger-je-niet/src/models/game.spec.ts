@@ -1,3 +1,5 @@
+import { GameEvent, GameEventInfo } from 'app/game-event-message';
+import { Observer } from 'rxjs';
 import { Board } from './board';
 import { Color } from './color';
 import { Dice } from './dice';
@@ -27,11 +29,14 @@ type FirstPlayerDeterminerSpy = {
   isFirstPlayerAlreadyDeterminedSpy: jasmine.Spy<() => boolean>;
   firstPlayerIndexSpy: jasmine.Spy<(this: FirstPlayerDeterminer) => number>;
 };
+let gameEventObserver: jasmine.SpyObj<
+  Observer<{ event: GameEvent; info: GameEventInfo }>
+>;
 
-describe('Game', () => {
+fdescribe('Game', () => {
   const createPlayerSpy = (pawnColor: Color): PlayerSpy => {
     const player = new Player();
-    return {
+    const spy = {
       player,
       rollDiceSpy: spyOn(player, 'rollDice'),
       putPawnsOnHomeFieldsSpy: spyOn(player, 'putPawnsOnHomeFields'),
@@ -41,6 +46,9 @@ describe('Game', () => {
       latestDiceRollSpy: spyOnProperty(player, 'latestDiceRoll'),
       hasPawnsToMoveSpy: spyOn(player, 'hasPawnsToMove'),
     };
+
+    spy.latestDiceRollSpy.and.returnValue(0);
+    return spy;
   };
   const createFirstPlayerDeterminerSpy = (): FirstPlayerDeterminerSpy => {
     const firstPlayerDeterminer = new FirstPlayerDeterminer();
@@ -71,6 +79,7 @@ describe('Game', () => {
   };
 
   const arrangeDetermineFirstPlayer = (): void => {
+    playerSpies[0].latestDiceRollSpy.and.returnValue(5);
     firstPlayerDeterminerSpy.isFirstPlayerAlreadyDeterminedSpy.and.returnValue(
       true
     );
@@ -80,7 +89,7 @@ describe('Game', () => {
 
   const arrangeMovePawnToStartField = (): void => {
     arrangeDetermineFirstPlayer();
-    playerSpies[1].latestDiceRollSpy.and.returnValues(6);
+    playerSpies[1].latestDiceRollSpy.and.returnValue(6);
     game.currentPlayerRollDice();
   };
 
@@ -111,17 +120,18 @@ describe('Game', () => {
     };
     boardSpy.getFieldGroupByColorSpy.and.callThrough();
 
-    const currentPlayerObserver = jasmine.createSpyObj(
-      'currentPlayerObserver',
-      ['next', 'error', 'complete']
-    );
-
     game = new Game(
       dice,
       board,
       playerSpies.map((playerSpy) => playerSpy.player),
       firstPlayerDeterminerSpy.firsPlayerDeterminer
     );
+
+    gameEventObserver = jasmine.createSpyObj<
+      Observer<{ event: GameEvent; info: GameEventInfo }>
+    >('Observer', ['next', 'complete', 'error']);
+    game.gameEvent$.subscribe(gameEventObserver);
+    gameEventObserver.next.calls.reset();
   });
 
   describe('constructor()', () => {
@@ -165,6 +175,22 @@ describe('Game', () => {
         boardSpy.board.fieldGroups[3].homeFields
       );
     });
+
+    it('should raise GameNotStartedYet event', () => {
+      gameEventObserver.next.calls.reset();
+      game = new Game(
+        diceSpy.dice,
+        boardSpy.board,
+        playerSpies.map((playerSpy) => playerSpy.player),
+        firstPlayerDeterminerSpy.firsPlayerDeterminer
+      );
+      game.gameEvent$.subscribe(gameEventObserver);
+
+      expect(gameEventObserver.next).toHaveBeenCalledWith({
+        event: GameEvent.GameNotStartedYet,
+        info: { currentPlayerIndex: 0, nextPlayerIndex: 1, latestDiceRoll: 0 },
+      });
+    });
   });
 
   describe('get currentPlayer()', () => {
@@ -175,14 +201,32 @@ describe('Game', () => {
 
   describe('currentPlayerRollDice()', () => {
     it('should give the turn to the next player when first player not yet determined', () => {
+      playerSpies[0].latestDiceRollSpy.and.returnValue(3);
       game.currentPlayerRollDice();
       expect(playerSpies[0].rollDiceSpy).toHaveBeenCalledWith(diceSpy.dice);
       expect(game.currentPlayerIndex).toBe(1);
+      expect(gameEventObserver.next).toHaveBeenCalledWith({
+        event: GameEvent.DetermineFirstPlayerFailed,
+        info: {
+          currentPlayerIndex: 0,
+          latestDiceRoll: 3,
+          nextPlayerIndex: 1,
+        },
+      });
     });
 
     it('should give the turn to player with highest dice roll when first player determined', () => {
       arrangeDetermineFirstPlayer();
+
       expect(game.currentPlayerIndex).toBe(1);
+      expect(gameEventObserver.next).toHaveBeenCalledWith({
+        event: GameEvent.FirstPlayerDetermined,
+        info: {
+          currentPlayerIndex: 0,
+          latestDiceRoll: 5,
+          nextPlayerIndex: 1,
+        },
+      });
     });
 
     it('should let player put a pawn on start field when dice roll is 6', () => {
@@ -190,6 +234,15 @@ describe('Game', () => {
 
       expect(playerSpies[1].movePawnToStartFieldSpy).toHaveBeenCalled();
       expect(game.currentPlayerIndex).toBe(1);
+
+      expect(gameEventObserver.next.calls.count()).toBe(2);
+      const params = gameEventObserver.next.calls.mostRecent().args[0];
+      expect(params.event).toBe(GameEvent.CurrentPlayerMovedPawnToStartField);
+      expect(params.info).toEqual({
+        currentPlayerIndex: 1,
+        latestDiceRoll: 6,
+        nextPlayerIndex: 2,
+      });
     });
 
     it('should let player move pawn from start field', () => {
@@ -218,6 +271,8 @@ describe('Game', () => {
       expect(game.currentPlayerIndex).toBe(1);
 
       // player 1 roll dice
+      gameEventObserver.next.calls.reset();
+      playerSpies[1].latestDiceRollSpy.and.returnValue(5);
       playerSpies[1].hasPawnsToMoveSpy.and.returnValue(true);
       game.currentPlayerRollDice();
       expect(playerSpies[1].rollDiceSpy).toHaveBeenCalledWith(diceSpy.dice);
@@ -231,6 +286,19 @@ describe('Game', () => {
       expect(playerSpies[1].movePawnSpy).toHaveBeenCalledWith(
         game.players[1].pawns[0]
       );
+
+      expect(gameEventObserver.next).toHaveBeenCalledWith({
+        event: GameEvent.CurrentPlayerMovedPawn,
+        info: {
+          currentPlayerIndex: 1,
+          latestDiceRoll: 5,
+          nextPlayerIndex: 2,
+        },
+      });
+    });
+
+    it('should let the current player move a pawn when no pawns on home field', () => {
+      // TODO
     });
   });
 });
