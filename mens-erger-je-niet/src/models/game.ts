@@ -151,7 +151,8 @@ export class Game {
   private currentPlayerShouldMovePawnOnStartField(): boolean {
     return (
       !this.turn.isPlayerPuttingPawnOnStartField &&
-      this.currentPlayer.latestDiceRoll === 6
+      this.currentPlayer.latestDiceRoll === 6 &&
+      !!this.currentPlayer.findPawnOnHomeField()
     );
   }
 

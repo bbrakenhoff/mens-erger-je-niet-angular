@@ -106,6 +106,34 @@ describe('Player', () => {
     });
   });
 
+  describe('findPawnOnHomeField()', () => {
+    it('should return first pawn found on home field', () => {
+      const normalField0 = new NormalField(Color.Blue, 0);
+      pawnsSpies[0].pawn.field = normalField0;
+      const homeField0 = new HomeField(Color.Blue);
+      pawnsSpies[1].pawn.field = homeField0;
+      const homeField1 = new HomeField(Color.Blue);
+      pawnsSpies[2].pawn.field = homeField1;
+      const normalField3 = new NormalField(Color.Blue, 3);
+      pawnsSpies[3].pawn.field = normalField3;
+
+      expect(player.findPawnOnHomeField()).toBe(pawnsSpies[1].pawn)
+    });
+
+    it('should return undefined when no pawns on home field', () => {
+      const normalField0 = new NormalField(Color.Blue, 0);
+      pawnsSpies[0].pawn.field = normalField0;
+      const normalField1 = new NormalField(Color.Blue, 1);
+      pawnsSpies[1].pawn.field = normalField1;
+      const normalField2 = new NormalField(Color.Blue, 2);
+      pawnsSpies[2].pawn.field = normalField2;
+      const normalField3 = new NormalField(Color.Blue, 3);
+      pawnsSpies[3].pawn.field = normalField3;
+
+      expect(player.findPawnOnHomeField()).toBeUndefined()
+    });
+  });
+
   describe('movePawnToStartField()', () => {
     it('should move the first pawn found on a home field to start field', () => {
       const normalField0 = new NormalField(Color.Blue, 0);

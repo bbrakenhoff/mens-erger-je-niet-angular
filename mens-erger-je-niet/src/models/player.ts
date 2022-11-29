@@ -55,7 +55,7 @@ export class Player {
     this.findPawnOnHomeField()?.moveToNextField();
   }
 
-  private findPawnOnHomeField(): Pawn | undefined {
+  public findPawnOnHomeField(): Pawn | undefined {
     return this.pawns.find((pawn) => pawn.field instanceof HomeField);
   }
 

@@ -19,6 +19,7 @@ type PlayerSpy = {
   movePawnSpy: jasmine.Spy<(pawn: Pawn) => Pawn | undefined>;
   latestDiceRollSpy: jasmine.Spy<(this: Player) => number>;
   hasPawnsToMoveSpy: jasmine.Spy<() => boolean>;
+  findPawnOnHomeField: jasmine.Spy<() => Pawn | undefined>;
 };
 
 type FirstPlayerDeterminerSpy = {
@@ -45,6 +46,7 @@ fdescribe('Game', () => {
       movePawnSpy: spyOn(player, 'movePawn'),
       latestDiceRollSpy: spyOnProperty(player, 'latestDiceRoll'),
       hasPawnsToMoveSpy: spyOn(player, 'hasPawnsToMove'),
+      findPawnOnHomeField: spyOn(player, 'findPawnOnHomeField'),
     };
 
     spy.latestDiceRollSpy.and.returnValue(0);
@@ -90,12 +92,42 @@ fdescribe('Game', () => {
   const arrangeMovePawnToStartField = (): void => {
     arrangeDetermineFirstPlayer();
     playerSpies[1].latestDiceRollSpy.and.returnValue(6);
+    playerSpies[1].findPawnOnHomeField.and.returnValue(new Pawn(Color.Blue));
     game.currentPlayerRollDice();
   };
 
   const arrangeMovePawnFromStartField = (): void => {
     arrangeMovePawnToStartField();
     game.currentPlayerRollDice();
+  };
+
+  const arrangeMovePawn = (latestDiceRoll: number): void => {
+    arrangeMovePawnFromStartField();
+    playerSpies[1].findPawnOnHomeField.and.returnValue(undefined);
+
+    // player 2 roll dice
+    game.currentPlayerRollDice();
+    expect(playerSpies[2].rollDiceSpy).toHaveBeenCalledWith(diceSpy.dice);
+    expect(game.currentPlayerIndex).toBe(3);
+
+    // player 3 roll dice
+    game.currentPlayerRollDice();
+    expect(playerSpies[3].rollDiceSpy).toHaveBeenCalledWith(diceSpy.dice);
+    expect(game.currentPlayerIndex).toBe(0);
+
+    // player 0 roll dice
+    game.currentPlayerRollDice();
+    expect(playerSpies[0].rollDiceSpy).toHaveBeenCalledWith(diceSpy.dice);
+    expect(game.currentPlayerIndex).toBe(1);
+
+    // player 1 roll dice
+    gameEventObserver.next.calls.reset();
+    playerSpies[1].latestDiceRollSpy.and.returnValue(latestDiceRoll);
+    playerSpies[1].hasPawnsToMoveSpy.and.returnValue(true);
+    game.currentPlayerRollDice();
+
+    // back at first player, who has a pawn to move
+    game.currentPlayerMovePawn(playerSpies[1].player.pawns[0]);
   };
 
   let game: Game;
@@ -250,38 +282,20 @@ fdescribe('Game', () => {
 
       expect(playerSpies[1].movePawnFromStartFieldSpy).toHaveBeenCalled();
       expect(game.currentPlayerIndex).toBe(2);
+
+      const params = gameEventObserver.next.calls.mostRecent().args[0];
+      expect(params.event).toBe(GameEvent.CurrentPlayerMovedPawnFromStartField);
+      expect(params.info).toEqual({
+        currentPlayerIndex: 1,
+        latestDiceRoll: 6,
+        nextPlayerIndex: 2,
+      });
     });
 
     it('should let the current player move a pawn', () => {
-      arrangeMovePawnFromStartField();
+      playerSpies[1].findPawnOnHomeField.and.returnValue(new Pawn(Color.Blue));
+      arrangeMovePawn(5);
 
-      // player 2 roll dice
-      game.currentPlayerRollDice();
-      expect(playerSpies[2].rollDiceSpy).toHaveBeenCalledWith(diceSpy.dice);
-      expect(game.currentPlayerIndex).toBe(3);
-
-      // player 3 roll dice
-      game.currentPlayerRollDice();
-      expect(playerSpies[3].rollDiceSpy).toHaveBeenCalledWith(diceSpy.dice);
-      expect(game.currentPlayerIndex).toBe(0);
-
-      // player 0 roll dice
-      game.currentPlayerRollDice();
-      expect(playerSpies[0].rollDiceSpy).toHaveBeenCalledWith(diceSpy.dice);
-      expect(game.currentPlayerIndex).toBe(1);
-
-      // player 1 roll dice
-      gameEventObserver.next.calls.reset();
-      playerSpies[1].latestDiceRollSpy.and.returnValue(5);
-      playerSpies[1].hasPawnsToMoveSpy.and.returnValue(true);
-      game.currentPlayerRollDice();
-      expect(playerSpies[1].rollDiceSpy).toHaveBeenCalledWith(diceSpy.dice);
-      expect(game.currentPlayerIndex).toBe(1);
-
-      playerSpies[1].player.pawns.push(new Pawn(Color.Blue));
-
-      // back at first player, who has a pawn to move
-      game.currentPlayerMovePawn(playerSpies[1].player.pawns[0]);
       expect(game.currentPlayerIndex).toBe(2);
       expect(playerSpies[1].movePawnSpy).toHaveBeenCalledWith(
         game.players[1].pawns[0]
@@ -297,8 +311,23 @@ fdescribe('Game', () => {
       });
     });
 
-    it('should let the current player move a pawn when no pawns on home field', () => {
-      // TODO
+    it('should let the current player move a pawn when dice roll is 6 and no pawns on home field', () => {
+      playerSpies[1].findPawnOnHomeField.and.returnValue(undefined);
+      arrangeMovePawn(6);
+
+      expect(game.currentPlayerIndex).toBe(2);
+      expect(playerSpies[1].movePawnSpy).toHaveBeenCalledWith(
+        game.players[1].pawns[0]
+      );
+
+      expect(gameEventObserver.next).toHaveBeenCalledWith({
+        event: GameEvent.CurrentPlayerMovedPawn,
+        info: {
+          currentPlayerIndex: 1,
+          latestDiceRoll: 6,
+          nextPlayerIndex: 2,
+        },
+      });
     });
   });
 });
