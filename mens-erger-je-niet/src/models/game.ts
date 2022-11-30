@@ -157,23 +157,23 @@ export class Game {
   }
 
   private currentPlayerMovePawnToStartField(): void {
+    this.updateGameEvent(GameEvent.CurrentPlayerMovedPawnToStartField);
     this.currentPlayer.movePawnToStartField();
     this.turn.hasRolledDice = false;
     this.turn.isPlayerPuttingPawnOnStartField = true;
 
-    this.updateGameEvent(GameEvent.CurrentPlayerMovedPawnToStartField);
   }
 
   private currentPlayerMovePawnFromStartField(): void {
-    this.currentPlayer.movePawnFromStartField();
     this.updateGameEvent(GameEvent.CurrentPlayerMovedPawnFromStartField);
+    this.currentPlayer.movePawnFromStartField();
     this.nextTurn();
   }
 
   public currentPlayerMovePawn(pawn: Pawn): void {
     if (this.turn.hasRolledDice) {
-      this.currentPlayer.movePawn(pawn);
       this.updateGameEvent(GameEvent.CurrentPlayerMovedPawn);
+      this.currentPlayer.movePawn(pawn);
       this.nextTurn();
     }
   }
