@@ -117,13 +117,13 @@ describe('Pawn', () => {
     });
 
     it('should beat another pawn when field already occupied', () => {
-      otherPawn.field = fields[4];
-      fields[4].pawn = otherPawn;
+      otherPawn.field = fields[5];
+      fields[5].pawn = otherPawn;
 
       expect(pawn.moveToFieldAfter(steps)).toBe(otherPawn);
 
-      expect(pawn.field).toBe(fields[4]);
-      expect(fields[4].pawn).toBe(pawn);
+      expect(pawn.field).toBe(fields[5]);
+      expect(fields[5].pawn).toBe(pawn);
       expect(fields[0].pawn).toBeUndefined();
     });
   });

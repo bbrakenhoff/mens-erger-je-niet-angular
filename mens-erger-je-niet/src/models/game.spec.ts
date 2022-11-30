@@ -34,7 +34,7 @@ let gameEventObserver: jasmine.SpyObj<
   Observer<{ event: GameEvent; info: GameEventInfo }>
 >;
 
-fdescribe('Game', () => {
+describe('Game', () => {
   const createPlayerSpy = (pawnColor: Color): PlayerSpy => {
     const player = new Player();
     const spy = {
