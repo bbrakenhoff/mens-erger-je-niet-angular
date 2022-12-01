@@ -120,7 +120,7 @@ export class Game {
   }
 
   private tryDeterminingFirstPlayer(): void {
-    if (this.determineFirstPlayer()) {
+    if (this.isFirstPlayerDetermined()) {
       this.updateGameEvent(
         GameEvent.FirstPlayerDetermined,
         this.firstPlayerDeterminer.firstPlayerIndex
@@ -133,7 +133,7 @@ export class Game {
     }
   }
 
-  private determineFirstPlayer(): boolean {
+  private isFirstPlayerDetermined(): boolean {
     this.firstPlayerDeterminer.determineFirstPlayer(
       this.players,
       this.currentPlayerIndex
