@@ -39,10 +39,10 @@ describe('FirstPlayerDeterminer', () => {
       expect(
         firstPlayerDeterminer.isFirstPlayerAlreadyDetermined()
       ).toBeFalse();
-      firstPlayerDeterminer.determineFirstPlayer(players, 3);
+      firstPlayerDeterminer.determineFirstPlayer(players);
       expect(firstPlayerDeterminer.isFirstPlayerAlreadyDetermined()).toBeTrue();
     });
-    
+
     it('should return true when first player already determined', () => {
       spyOnPlayer(0, 3, 4);
       spyOnPlayer(1, 4, 3);
@@ -52,7 +52,7 @@ describe('FirstPlayerDeterminer', () => {
       expect(
         firstPlayerDeterminer.isFirstPlayerAlreadyDetermined()
       ).toBeFalse();
-      firstPlayerDeterminer.determineFirstPlayer(players, 3);
+      firstPlayerDeterminer.determineFirstPlayer(players);
       expect(firstPlayerDeterminer.isFirstPlayerAlreadyDetermined()).toBeTrue();
       expect(firstPlayerDeterminer.isFirstPlayerAlreadyDetermined()).toBeTrue();
     });
@@ -63,7 +63,7 @@ describe('FirstPlayerDeterminer', () => {
       spyOnPlayer(0, 3);
       spyOnPlayer(1, 4);
       spyOnPlayer(2, 5);
-      firstPlayerDeterminer.determineFirstPlayer(players, 2);
+      firstPlayerDeterminer.determineFirstPlayer(players);
       expect(firstPlayerDeterminer.firstPlayerIndex).toBe(-1);
     });
 
@@ -72,7 +72,7 @@ describe('FirstPlayerDeterminer', () => {
       spyOnPlayer(1, 4);
       spyOnPlayer(2, 5);
       spyOnPlayer(3, 5);
-      firstPlayerDeterminer.determineFirstPlayer(players, 2);
+      firstPlayerDeterminer.determineFirstPlayer(players);
       expect(firstPlayerDeterminer.firstPlayerIndex).toBe(-1);
     });
 
@@ -81,7 +81,7 @@ describe('FirstPlayerDeterminer', () => {
       spyOnPlayer(1, 4, 4);
       spyOnPlayer(2, 5, 5);
       spyOnPlayer(3, 6, 6);
-      firstPlayerDeterminer.determineFirstPlayer(players, 3);
+      firstPlayerDeterminer.determineFirstPlayer(players);
       expect(firstPlayerDeterminer.firstPlayerIndex).toBe(3);
     });
 
@@ -91,9 +91,9 @@ describe('FirstPlayerDeterminer', () => {
       spyOnPlayer(2, 5, 2);
       spyOnPlayer(3, 6, 1);
 
-      firstPlayerDeterminer.determineFirstPlayer(players, 3);
+      firstPlayerDeterminer.determineFirstPlayer(players);
       expect(firstPlayerDeterminer.firstPlayerIndex).toBe(3);
-      firstPlayerDeterminer.determineFirstPlayer(players, 3);
+      firstPlayerDeterminer.determineFirstPlayer(players);
       expect(firstPlayerDeterminer.firstPlayerIndex).toBe(3);
     });
   });

@@ -1,5 +1,4 @@
 export interface Turn {
-  playerIndex: number;
-  hasRolledDice: boolean;
+  diceRoll?: number;
   isPlayerPuttingPawnOnStartField: boolean;
 }

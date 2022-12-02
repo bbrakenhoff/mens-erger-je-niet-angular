@@ -11,5 +11,5 @@ export enum GameEvent {
 export interface GameEventInfo {
   currentPlayerIndex: number;
   nextPlayerIndex?: number;
-  latestDiceRoll: number;
+  latestDiceRoll?: number;
 }

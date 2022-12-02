@@ -4,17 +4,41 @@ import { HomeField } from './fields/home-field';
 import { NormalField } from './fields/normal-field';
 import { StartField } from './fields/start-field';
 import { Pawn } from './pawn';
+import { Turn } from './turn';
 
 export class Player {
   public readonly pawns: Pawn[] = [];
-  private _latestDiceRoll = 0;
 
-  public get latestDiceRoll(): number {
-    return this._latestDiceRoll;
+  private turn?: Turn;
+
+  public startTurn(): void {
+    this.turn = {
+      diceRoll: undefined,
+      isPlayerPuttingPawnOnStartField: false,
+    };
+  }
+
+  public stopTurn(): void {
+    this.turn = undefined;
+  }
+
+  public startPuttingPawnOnStartField(): void {
+    if (this.turn) {
+      this.turn.diceRoll = undefined;
+      this.turn.isPlayerPuttingPawnOnStartField = true;
+    }
+  }
+
+  public get latestDiceRoll(): number | undefined {
+    return this.turn?.diceRoll;
   }
 
   public get pawnColor(): Color {
     return this.pawns[0].color;
+  }
+
+  public get isPlayerPuttingPawnOnStartField(): boolean {
+    return this.turn?.isPlayerPuttingPawnOnStartField === true;
   }
 
   public putPawnOnHomeField(
@@ -40,11 +64,17 @@ export class Player {
   }
 
   public rollDice(dice: Dice): void {
-    this._latestDiceRoll = dice.roll();
+    if (this.turn) {
+      this.turn.diceRoll = dice.roll();
+    } else {
+      throw new Error(
+        'Player must have an active turn in order to roll the dice'
+      );
+    }
   }
 
   public movePawn(pawn: Pawn): Pawn | undefined {
-    if (this.pawns.includes(pawn)) {
+    if (this.pawns.includes(pawn) && this.latestDiceRoll) {
       return pawn.moveToFieldAfter(this.latestDiceRoll);
     } else {
       throw new Error("Player can only move it's own pawns");

@@ -16,7 +16,7 @@
           <h1
             class="card-title"
             *ngIf="
-              (gameEventMessage$ | async)!.info.latestDiceRoll > 0;
+              (gameEventMessage$ | async)!.info.latestDiceRoll;
               else emptyDiceRoll
             "
           >

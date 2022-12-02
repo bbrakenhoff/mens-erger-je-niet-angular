@@ -3,10 +3,11 @@ import { GameEvent, GameEventInfo } from '../app/game-event-message';
 import { Board } from './board';
 import { allColors } from './color';
 import { Dice } from './dice';
+import { DiceRollAction } from './dice-roll-action';
+import { DiceRollActionDeterminer } from './dice-roll-action-determiner';
 import { FirstPlayerDeterminer } from './first-player-determiner';
 import { Pawn } from './pawn';
 import { Player } from './player';
-import { Turn } from './turn';
 
 export class Game {
   private readonly _gameEvent$$: BehaviorSubject<{
@@ -21,14 +22,9 @@ export class Game {
   }
   private isDeterminingFirstPlayer = true;
 
-  private readonly turn: Turn = {
-    playerIndex: 0,
-    hasRolledDice: false,
-    isPlayerPuttingPawnOnStartField: false,
-  };
-
+  private _currentPlayerIndex = 0;
   public get currentPlayerIndex(): number {
-    return this.turn.playerIndex;
+    return this._currentPlayerIndex;
   }
   public constructor(
     private readonly dice = new Dice(),
@@ -43,11 +39,12 @@ export class Game {
   ) {
     this.letPlayersPutPawnsOnHomeFields();
 
+    this.nextTurn(0);
     const gameNotStartedEvent = {
       event: GameEvent.GameNotStartedYet,
       info: {
-        currentPlayerIndex: this.turn.playerIndex,
-        latestDiceRoll: this.players[this.turn.playerIndex].latestDiceRoll,
+        currentPlayerIndex: this._currentPlayerIndex,
+        latestDiceRoll: this.players[this._currentPlayerIndex].latestDiceRoll,
       } as GameEventInfo,
     };
     this._gameEvent$$ = new BehaviorSubject(gameNotStartedEvent);
@@ -61,9 +58,9 @@ export class Game {
     this._gameEvent$$.next({
       event,
       info: {
-        currentPlayerIndex: this.turn.playerIndex,
+        currentPlayerIndex: this._currentPlayerIndex,
         nextPlayerIndex,
-        latestDiceRoll: this.players[this.turn.playerIndex].latestDiceRoll,
+        latestDiceRoll: this.players[this._currentPlayerIndex].latestDiceRoll,
       },
     });
   }
@@ -97,7 +94,9 @@ export class Game {
   }
 
   private nextPlayerIndex(): number {
-    return this.turn.playerIndex + 1 === 4 ? 0 : this.turn.playerIndex + 1;
+    return this._currentPlayerIndex + 1 === 4
+      ? 0
+      : this._currentPlayerIndex + 1;
   }
 
   public currentPlayerRollDice(): void {
@@ -106,16 +105,10 @@ export class Game {
   }
 
   private handleRulesFollowingDiceRoll(): void {
-    this.turn.hasRolledDice = true;
     if (this.isDeterminingFirstPlayer) {
       this.tryDeterminingFirstPlayer();
-    } else if (this.currentPlayerShouldMovePawnOnStartField()) {
-      this.currentPlayerMovePawnToStartField();
-    } else if (this.turn.isPlayerPuttingPawnOnStartField) {
-      this.currentPlayerMovePawnFromStartField();
-    } else if (!this.currentPlayer.hasPawnsToMove()) {
-      this.updateGameEvent(GameEvent.CurrentPlayerHasNoPawnsToMove);
-      this.nextTurn();
+    } else {
+      this.letPlayerExecuteActionFollowingDiceRoll();
     }
   }
 
@@ -134,34 +127,38 @@ export class Game {
   }
 
   private isFirstPlayerDetermined(): boolean {
-    this.firstPlayerDeterminer.determineFirstPlayer(
-      this.players,
-      this.currentPlayerIndex
-    );
+    this.firstPlayerDeterminer.determineFirstPlayer(this.players);
 
     return this.firstPlayerDeterminer.isFirstPlayerAlreadyDetermined();
   }
 
   private nextTurn(playerIndex: number = this.nextPlayerIndex()): void {
-    this.turn.playerIndex = playerIndex;
-    this.turn.hasRolledDice = false;
-    this.turn.isPlayerPuttingPawnOnStartField = false;
+    this.currentPlayer.stopTurn();
+    this._currentPlayerIndex = playerIndex;
+    this.currentPlayer.startTurn();
   }
 
-  private currentPlayerShouldMovePawnOnStartField(): boolean {
-    return (
-      !this.turn.isPlayerPuttingPawnOnStartField &&
-      this.currentPlayer.latestDiceRoll === 6 &&
-      !!this.currentPlayer.findPawnOnHomeField()
+  public letPlayerExecuteActionFollowingDiceRoll(): void {
+    const diceRollActionDeterminer = new DiceRollActionDeterminer(
+      this.currentPlayer
     );
+    switch (diceRollActionDeterminer.determineAction()) {
+      case DiceRollAction.MovePawnToStart:
+        this.currentPlayerMovePawnToStartField();
+        break;
+      case DiceRollAction.MovePawnFromStart:
+        this.currentPlayerMovePawnFromStartField();
+        break;
+      case DiceRollAction.DoNothing:
+        this.nextTurn();
+        break;
+    }
   }
 
   private currentPlayerMovePawnToStartField(): void {
     this.updateGameEvent(GameEvent.CurrentPlayerMovedPawnToStartField);
     this.currentPlayer.movePawnToStartField();
-    this.turn.hasRolledDice = false;
-    this.turn.isPlayerPuttingPawnOnStartField = true;
-
+    this.currentPlayer.startPuttingPawnOnStartField();
   }
 
   private currentPlayerMovePawnFromStartField(): void {
@@ -171,7 +168,7 @@ export class Game {
   }
 
   public currentPlayerMovePawn(pawn: Pawn): void {
-    if (this.turn.hasRolledDice) {
+    if (this.currentPlayer.latestDiceRoll) {
       this.updateGameEvent(GameEvent.CurrentPlayerMovedPawn);
       this.currentPlayer.movePawn(pawn);
       this.nextTurn();

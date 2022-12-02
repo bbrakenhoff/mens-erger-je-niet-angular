@@ -45,6 +45,7 @@ describe('Player', () => {
 
     player = new Player();
     player.pawns.push(...pawnsSpies.map((pawnSpy) => pawnSpy.pawn));
+    player.startTurn();
   });
 
   describe('pawnColor', () => {
@@ -104,6 +105,13 @@ describe('Player', () => {
       expect(player.latestDiceRoll).toBe(3);
       expect(dice.roll).toHaveBeenCalled();
     });
+
+    it('should throw an error when player tries to roll the dice while not having a turn', () => {
+      player.stopTurn();
+      expect(() => player.rollDice(dice)).toThrowError(
+        'Player must have an active turn in order to roll the dice'
+      );
+    });
   });
 
   describe('findPawnOnHomeField()', () => {
@@ -117,7 +125,7 @@ describe('Player', () => {
       const normalField3 = new NormalField(Color.Blue, 3);
       pawnsSpies[3].pawn.field = normalField3;
 
-      expect(player.findPawnOnHomeField()).toBe(pawnsSpies[1].pawn)
+      expect(player.findPawnOnHomeField()).toBe(pawnsSpies[1].pawn);
     });
 
     it('should return undefined when no pawns on home field', () => {
@@ -130,7 +138,7 @@ describe('Player', () => {
       const normalField3 = new NormalField(Color.Blue, 3);
       pawnsSpies[3].pawn.field = normalField3;
 
-      expect(player.findPawnOnHomeField()).toBeUndefined()
+      expect(player.findPawnOnHomeField()).toBeUndefined();
     });
   });
 
