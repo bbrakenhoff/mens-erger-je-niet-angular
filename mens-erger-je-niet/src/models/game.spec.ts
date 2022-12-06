@@ -1,5 +1,5 @@
 import { GameEvent } from 'app/game-event-message';
-import { BehaviorSubject, Observer } from 'rxjs';
+import { BehaviorSubject, Observer, skip } from 'rxjs';
 import { Board } from './board';
 import { Color } from './color';
 import { Dice } from './dice';
@@ -58,6 +58,9 @@ type PlayerSpy = {
   rollDiceSpy: jasmine.Spy<(dice: Dice) => void>;
   findPawnOnHomeFieldSpy: jasmine.Spy<() => Pawn | undefined>;
   movePawnToStartFieldSpy: jasmine.Spy<() => void>;
+  startTurnSpy: jasmine.Spy<() => void>;
+  endTurnSpy: jasmine.Spy<() => void>;
+
   //   putPawnsOnHomeFieldsSpy: jasmine.Spy<(homeFields: HomeField[]) => void>;
   //   movePawnFromStartFieldSpy: jasmine.Spy<() => void>;
   //   movePawnSpy: jasmine.Spy<(pawn: Pawn) => Pawn | undefined>;
@@ -77,10 +80,23 @@ function createPlayerSpy(): PlayerSpy {
     rollDiceSpy: spyOn(player, 'rollDice'),
     findPawnOnHomeFieldSpy: spyOn(player, 'findPawnOnHomeField'),
     movePawnToStartFieldSpy: spyOn(player, 'movePawnToStartField'),
+    startTurnSpy: spyOn(player, 'startTurn'),
+    endTurnSpy: spyOn(player, 'endTurn'),
   };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (player as any)['trurn$'] = turn$Spy;
-  // spyOnProperty(player, 'turn$').and.returnValue(turn$Spy);
+
+  playerSpy.startTurnSpy.and.callFake(() => {
+    playerSpy.turn$Spy.next({
+      diceRoll: -1,
+      isPlayerPuttingPawnOnStartField: false,
+    });
+  });
+
+  playerSpy.endTurnSpy.and.callFake(() => {
+    playerSpy.turn$Spy.next(undefined);
+  });
+
   return playerSpy;
 }
 
@@ -135,13 +151,16 @@ describe('Game', () => {
     diceRollActionDeterminerSpy.determineActionSpy.and.returnValue(
       DiceRollAction.MovePawnToStart
     );
+    playerSpies[1].findPawnOnHomeFieldSpy.and.returnValue(new Pawn(Color.Blue));
 
-    playerSpies[1].turn$Spy.next({
-      diceRoll: 6,
-      isPlayerPuttingPawnOnStartField: false,
+    playerSpies[1].rollDiceSpy.and.callFake(() => {
+      console.log(`Bijoya game.spec.ts[ln:141] fake update roll dice!`);
+      playerSpies[1].turn$Spy.next({
+        diceRoll: 6,
+        isPlayerPuttingPawnOnStartField: false,
+      });
     });
 
-    playerSpies[1].findPawnOnHomeFieldSpy.and.returnValue(new Pawn(Color.Blue));
     game.currentPlayerRollDice();
   };
 
@@ -289,7 +308,7 @@ describe('Game', () => {
       // });
     });
 
-    fit('should give the turn to player with highest dice roll when first player determined', () => {
+    it('should give the turn to player with highest dice roll when first player determined', () => {
       arrangeDetermineFirstPlayer();
 
       expect(game.currentPlayerIndex).toBe(1);
@@ -303,14 +322,20 @@ describe('Game', () => {
       // });
     });
 
-    it('should let player put a pawn on start field when dice roll is 6', () => {
+    fit('should let player put a pawn on start field when dice roll is 6', (done: DoneFn) => {
+      playerSpies[1].turn$Spy.pipe(skip(2)).subscribe({
+        next: (turn) => {
+          expect(turn?.isPlayerPuttingPawnOnStartField).toBeTrue();
+          expect(
+            diceRollActionDeterminerSpy.determineActionSpy
+          ).toHaveBeenCalledWith(playerSpies[1].player);
+          expect(playerSpies[1].movePawnToStartFieldSpy).toHaveBeenCalled();
+          expect(game.currentPlayerIndex).toBe(1);
+          done();
+        },
+        error: done.fail,
+      });
       arrangeMovePawnToStartField();
-
-      expect(
-        diceRollActionDeterminerSpy.determineActionSpy
-      ).toHaveBeenCalledWith(playerSpies[1].player);
-      expect(playerSpies[1].movePawnToStartFieldSpy).toHaveBeenCalled();
-      expect(game.currentPlayerIndex).toBe(1);
 
       //       expect(gameEventObserver.next.calls.count()).toBe(2);
       //       const params = gameEventObserver.next.calls.mostRecent().args[0];

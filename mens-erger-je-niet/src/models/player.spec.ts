@@ -16,7 +16,7 @@ type PawnSpy = {
   moveToNextFieldSpy: jasmine.Spy<(newField: Field) => Pawn | undefined>;
 };
 
-fdescribe('Player', () => {
+describe('Player', () => {
   const createPawnSpy = (color: Color = Color.Blue): PawnSpy => {
     const pawn = new Pawn(color);
     return {

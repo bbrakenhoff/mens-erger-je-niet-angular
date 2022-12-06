@@ -1,4 +1,4 @@
-import { BehaviorSubject, Observable, Observer, Subscription } from 'rxjs';
+import { BehaviorSubject, filter, merge, Observable } from 'rxjs';
 import { GameEvent, GameEventInfo } from '../app/game-event-message';
 import { Board } from './board';
 import { allColors } from './color';
@@ -28,7 +28,11 @@ export class Game {
     return this._currentPlayerIndex;
   }
 
-  private turnSubscription?: Subscription;
+  private set currentPlayerIndex(value: number) {
+    this.currentPlayer.endTurn();
+    this._currentPlayerIndex = value;
+    this.currentPlayer.startTurn();
+  }
 
   public constructor(
     private readonly dice = new Dice(),
@@ -46,10 +50,13 @@ export class Game {
       next: (firstPlayerIndex) =>
         this.onFirstPlayerDeterminerUpdate(firstPlayerIndex),
     });
-
-    this.players.forEach((player) => {
-      player.turn$.subscribe(this.turnObserver);
+    merge(...this.players.map((player) => player.turn$)).subscribe({
+      next: (turn?: Turn) => this.onTurnUpdated(turn),
     });
+
+    // this.players.forEach((player) => {
+    //   player.turn$.subscribe(this.turnObserver);
+    // });
 
     this.letPlayersPutPawnsOnHomeFields();
 
@@ -118,34 +125,32 @@ export class Game {
   }
 
   private onFirstPlayerDeterminerUpdate(firstPlayerIndex: number): void {
-    if (firstPlayerIndex > -1) {
-      this.isDeterminingFirstPlayer = false;
-      this.nextTurn(firstPlayerIndex);
-    } else {
+    this.isDeterminingFirstPlayer = firstPlayerIndex === -1;
+    if (this.isDeterminingFirstPlayer) {
       this.nextTurn();
+    } else {
+      this.nextTurn(firstPlayerIndex);
     }
+    console.log(
+      `%cBijoya game.ts[ln:129] onFirstPlayerDeterminerUpdate()`,
+      'color: deeppink',
+      this.isDeterminingFirstPlayer
+    );
   }
 
   private nextTurn(playerIndex: number = this.nextPlayerIndex()): void {
-    this.currentPlayer.endTurn();
-    this.turnSubscription?.unsubscribe();
-    this._currentPlayerIndex = playerIndex;
-    this.turnSubscription = this.players[
-      this._currentPlayerIndex
-    ].turn$.subscribe({
-      next: (turn?) => this.onTurnUpdated(turn),
-    });
-    this.currentPlayer.startTurn();
+    this.currentPlayerIndex = playerIndex;
   }
 
   private onTurnUpdated(turn?: Turn): void {
     console.log(`Bijoya game.ts[ln:135] onTurnUpdated()`, turn);
     if (!this.isDeterminingFirstPlayer && turn) {
-      this.letPlayerExecuteActionFollowingDiceRoll();
+      return this.letPlayerExecuteActionFollowingDiceRoll();
     }
   }
 
   public letPlayerExecuteActionFollowingDiceRoll(): void {
+    console.log(`Bijoya game.ts[ln:153] letPlayerExecuteActionFollowingDiceRoll()`)
     switch (this.diceRollActionDeterminer.determineAction(this.currentPlayer)) {
       case DiceRollAction.MovePawnToStart:
         this.currentPlayerMovePawnToStartField();
