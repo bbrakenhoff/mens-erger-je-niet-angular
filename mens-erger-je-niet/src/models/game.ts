@@ -1,4 +1,4 @@
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, Observer, Subscription } from 'rxjs';
 import { GameEvent, GameEventInfo } from '../app/game-event-message';
 import { Board } from './board';
 import { allColors } from './color';
@@ -8,6 +8,7 @@ import { DiceRollActionDeterminer } from './dice-roll-action-determiner';
 import { FirstPlayerDeterminer } from './first-player-determiner';
 import { Pawn } from './pawn';
 import { Player } from './player';
+import { Turn } from './turn';
 
 export class Game {
   private readonly _gameEvent$$: BehaviorSubject<{
@@ -26,6 +27,9 @@ export class Game {
   public get currentPlayerIndex(): number {
     return this._currentPlayerIndex;
   }
+
+  private turnSubscription?: Subscription;
+
   public constructor(
     private readonly dice = new Dice(),
     public readonly board = new Board(),
@@ -35,8 +39,18 @@ export class Game {
       new Player(),
       new Player(),
     ],
-    private readonly firstPlayerDeterminer = new FirstPlayerDeterminer()
+    private readonly firstPlayerDeterminer = new FirstPlayerDeterminer(players),
+    private readonly diceRollActionDeterminer = new DiceRollActionDeterminer()
   ) {
+    this.firstPlayerDeterminer.firstPlayerIndex$.subscribe({
+      next: (firstPlayerIndex) =>
+        this.onFirstPlayerDeterminerUpdate(firstPlayerIndex),
+    });
+
+    this.players.forEach((player) => {
+      player.turn$.subscribe(this.turnObserver);
+    });
+
     this.letPlayersPutPawnsOnHomeFields();
 
     this.nextTurn(0);
@@ -44,7 +58,7 @@ export class Game {
       event: GameEvent.GameNotStartedYet,
       info: {
         currentPlayerIndex: this._currentPlayerIndex,
-        latestDiceRoll: this.players[this._currentPlayerIndex].latestDiceRoll,
+        // latestDiceRoll: this.players[this._currentPlayerIndex].turn$,
       } as GameEventInfo,
     };
     this._gameEvent$$ = new BehaviorSubject(gameNotStartedEvent);
@@ -60,7 +74,7 @@ export class Game {
       info: {
         currentPlayerIndex: this._currentPlayerIndex,
         nextPlayerIndex,
-        latestDiceRoll: this.players[this._currentPlayerIndex].latestDiceRoll,
+        // latestDiceRoll: this.players[this._currentPlayerIndex].turn$.,
       },
     });
   }
@@ -101,48 +115,38 @@ export class Game {
 
   public currentPlayerRollDice(): void {
     this.currentPlayer.rollDice(this.dice);
-    this.handleRulesFollowingDiceRoll();
   }
 
-  private handleRulesFollowingDiceRoll(): void {
-    if (this.isDeterminingFirstPlayer) {
-      this.tryDeterminingFirstPlayer();
-    } else {
-      this.letPlayerExecuteActionFollowingDiceRoll();
-    }
-  }
-
-  private tryDeterminingFirstPlayer(): void {
-    if (this.isFirstPlayerDetermined()) {
-      this.updateGameEvent(
-        GameEvent.FirstPlayerDetermined,
-        this.firstPlayerDeterminer.firstPlayerIndex
-      );
-      this.nextTurn(this.firstPlayerDeterminer.firstPlayerIndex);
+  private onFirstPlayerDeterminerUpdate(firstPlayerIndex: number): void {
+    if (firstPlayerIndex > -1) {
       this.isDeterminingFirstPlayer = false;
+      this.nextTurn(firstPlayerIndex);
     } else {
-      this.updateGameEvent(GameEvent.DetermineFirstPlayerFailed);
       this.nextTurn();
     }
   }
 
-  private isFirstPlayerDetermined(): boolean {
-    this.firstPlayerDeterminer.determineFirstPlayer(this.players);
-
-    return this.firstPlayerDeterminer.isFirstPlayerAlreadyDetermined();
-  }
-
   private nextTurn(playerIndex: number = this.nextPlayerIndex()): void {
-    this.currentPlayer.stopTurn();
+    this.currentPlayer.endTurn();
+    this.turnSubscription?.unsubscribe();
     this._currentPlayerIndex = playerIndex;
+    this.turnSubscription = this.players[
+      this._currentPlayerIndex
+    ].turn$.subscribe({
+      next: (turn?) => this.onTurnUpdated(turn),
+    });
     this.currentPlayer.startTurn();
   }
 
+  private onTurnUpdated(turn?: Turn): void {
+    console.log(`Bijoya game.ts[ln:135] onTurnUpdated()`, turn);
+    if (!this.isDeterminingFirstPlayer && turn) {
+      this.letPlayerExecuteActionFollowingDiceRoll();
+    }
+  }
+
   public letPlayerExecuteActionFollowingDiceRoll(): void {
-    const diceRollActionDeterminer = new DiceRollActionDeterminer(
-      this.currentPlayer
-    );
-    switch (diceRollActionDeterminer.determineAction()) {
+    switch (this.diceRollActionDeterminer.determineAction(this.currentPlayer)) {
       case DiceRollAction.MovePawnToStart:
         this.currentPlayerMovePawnToStartField();
         break;
@@ -158,7 +162,6 @@ export class Game {
   private currentPlayerMovePawnToStartField(): void {
     this.updateGameEvent(GameEvent.CurrentPlayerMovedPawnToStartField);
     this.currentPlayer.movePawnToStartField();
-    this.currentPlayer.startPuttingPawnOnStartField();
   }
 
   private currentPlayerMovePawnFromStartField(): void {
@@ -168,7 +171,7 @@ export class Game {
   }
 
   public currentPlayerMovePawn(pawn: Pawn): void {
-    if (this.currentPlayer.latestDiceRoll) {
+    if (this.currentPlayer.turn$) {
       this.updateGameEvent(GameEvent.CurrentPlayerMovedPawn);
       this.currentPlayer.movePawn(pawn);
       this.nextTurn();

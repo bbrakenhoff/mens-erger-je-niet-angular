@@ -1,3 +1,4 @@
+import { skip } from 'rxjs';
 import { Color } from './color';
 import { Dice } from './dice';
 import { Field } from './fields/field';
@@ -15,7 +16,7 @@ type PawnSpy = {
   moveToNextFieldSpy: jasmine.Spy<(newField: Field) => Pawn | undefined>;
 };
 
-describe('Player', () => {
+fdescribe('Player', () => {
   const createPawnSpy = (color: Color = Color.Blue): PawnSpy => {
     const pawn = new Pawn(color);
     return {
@@ -44,7 +45,7 @@ describe('Player', () => {
     }
 
     player = new Player();
-    player.pawns.push(...pawnsSpies.map((pawnSpy) => pawnSpy.pawn));
+    player.pawns = pawnsSpies.map((pawnSpy) => pawnSpy.pawn);
     player.startTurn();
   });
 
@@ -99,18 +100,79 @@ describe('Player', () => {
     });
   });
 
+  describe('startTurn()', () => {
+    it('should update turn$ with an empty turn', (done: DoneFn) => {
+      player.endTurn();
+      player.turn$.pipe(skip(1)).subscribe({
+        next: (value) => {
+          expect(value).toEqual({
+            diceRoll: -1,
+            isPlayerPuttingPawnOnStartField: false,
+          });
+          done();
+        },
+        error: done.fail,
+      });
+      player.startTurn();
+    });
+  });
+
+  describe('endTurn()', () => {
+    it('should update turn$ with undefined', (done: DoneFn) => {
+      player.turn$.pipe(skip(1)).subscribe({
+        next: (value) => {
+          expect(value).toBeUndefined();
+          done();
+        },
+        error: done.fail,
+      });
+      player.endTurn();
+    });
+  });
+
   describe('rollDice(dice)', () => {
-    it('should roll the dice and remember number of eyes rolled', () => {
+    it('should roll the dice and remember number of eyes rolled', (done: DoneFn) => {
+      player.turn$.pipe(skip(1)).subscribe({
+        next: (value) => {
+          expect(value).toEqual({
+            diceRoll: 3,
+            isPlayerPuttingPawnOnStartField: false,
+          });
+          done();
+        },
+        error: done.fail,
+      });
       player.rollDice(dice);
-      expect(player.latestDiceRoll).toBe(3);
-      expect(dice.roll).toHaveBeenCalled();
     });
 
-    it('should throw an error when player tries to roll the dice while not having a turn', () => {
-      player.stopTurn();
-      expect(() => player.rollDice(dice)).toThrowError(
-        'Player must have an active turn in order to roll the dice'
-      );
+    it('should roll the dice and remember number of eyes rolled when putting pawn on start field', (done: DoneFn) => {
+      player.movePawnToStartField();
+      player.turn$.pipe(skip(1)).subscribe({
+        next: (value) => {
+          expect(value).toEqual({
+            diceRoll: 3,
+            isPlayerPuttingPawnOnStartField: true,
+          });
+          done();
+        },
+        error: done.fail,
+      });
+
+      player.rollDice(dice);
+    });
+
+    it('should throw an error when player tries to roll the dice while not having a turn', (done: DoneFn) => {
+      player.endTurn();
+      player.turn$.pipe(skip(1)).subscribe({
+        next: () => done.fail(),
+        error: (error) => {
+          expect(error).toEqual(
+            Error('Player must have an active turn in order to roll the dice')
+          );
+          done();
+        },
+      });
+      player.rollDice(dice);
     });
   });
 
@@ -143,7 +205,7 @@ describe('Player', () => {
   });
 
   describe('movePawnToStartField()', () => {
-    it('should move the first pawn found on a home field to start field', () => {
+    it('should move the first pawn found on a home field to start field', (done: DoneFn) => {
       const normalField0 = new NormalField(Color.Blue, 0);
       pawnsSpies[0].pawn.field = normalField0;
       const normalField1 = new NormalField(Color.Blue, 1);
@@ -153,12 +215,22 @@ describe('Player', () => {
       const normalField3 = new NormalField(Color.Blue, 3);
       pawnsSpies[3].pawn.field = normalField3;
 
-      player.movePawnToStartField();
+      player.turn$.pipe(skip(1)).subscribe({
+        next: (turn?) => {
+          expect(turn).toEqual({
+            diceRoll: -1,
+            isPlayerPuttingPawnOnStartField: true,
+          });
+          expect(pawnsSpies[0].moveToNextFieldSpy).not.toHaveBeenCalled();
+          expect(pawnsSpies[1].moveToNextFieldSpy).not.toHaveBeenCalled();
+          expect(pawnsSpies[2].moveToNextFieldSpy).toHaveBeenCalled();
+          expect(pawnsSpies[3].moveToNextFieldSpy).not.toHaveBeenCalled();
+          done();
+        },
+        error: done.fail,
+      });
 
-      expect(pawnsSpies[0].moveToNextFieldSpy).not.toHaveBeenCalled();
-      expect(pawnsSpies[1].moveToNextFieldSpy).not.toHaveBeenCalled();
-      expect(pawnsSpies[2].moveToNextFieldSpy).toHaveBeenCalled();
-      expect(pawnsSpies[3].moveToNextFieldSpy).not.toHaveBeenCalled();
+      player.movePawnToStartField();
     });
 
     it('should do nothing when no pawns on home field', () => {

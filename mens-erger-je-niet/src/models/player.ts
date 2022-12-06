@@ -1,3 +1,4 @@
+import { BehaviorSubject } from 'rxjs';
 import { Color } from './color';
 import { Dice } from './dice';
 import { HomeField } from './fields/home-field';
@@ -7,38 +8,27 @@ import { Pawn } from './pawn';
 import { Turn } from './turn';
 
 export class Player {
-  public readonly pawns: Pawn[] = [];
+  public pawns: Pawn[] = [];
 
-  private turn?: Turn;
-
-  public startTurn(): void {
-    this.turn = {
-      diceRoll: undefined,
-      isPlayerPuttingPawnOnStartField: false,
-    };
-  }
-
-  public stopTurn(): void {
-    this.turn = undefined;
-  }
-
-  public startPuttingPawnOnStartField(): void {
-    if (this.turn) {
-      this.turn.diceRoll = undefined;
-      this.turn.isPlayerPuttingPawnOnStartField = true;
-    }
-  }
-
-  public get latestDiceRoll(): number | undefined {
-    return this.turn?.diceRoll;
-  }
+  private readonly _turn$$ = new BehaviorSubject<Turn | undefined>({
+    diceRoll: -1,
+    isPlayerPuttingPawnOnStartField: false,
+  });
+  public readonly turn$ = this._turn$$.asObservable();
 
   public get pawnColor(): Color {
     return this.pawns[0].color;
   }
 
-  public get isPlayerPuttingPawnOnStartField(): boolean {
-    return this.turn?.isPlayerPuttingPawnOnStartField === true;
+  public startTurn(): void {
+    this._turn$$.next({
+      diceRoll: -1,
+      isPlayerPuttingPawnOnStartField: false,
+    });
+  }
+
+  public endTurn(): void {
+    this._turn$$.next(undefined);
   }
 
   public putPawnOnHomeField(
@@ -64,18 +54,22 @@ export class Player {
   }
 
   public rollDice(dice: Dice): void {
-    if (this.turn) {
-      this.turn.diceRoll = dice.roll();
+    if (this._turn$$.value) {
+      this._turn$$.next({
+        diceRoll: dice.roll(),
+        isPlayerPuttingPawnOnStartField:
+          this._turn$$.value.isPlayerPuttingPawnOnStartField,
+      });
     } else {
-      throw new Error(
-        'Player must have an active turn in order to roll the dice'
+      this._turn$$.error(
+        Error('Player must have an active turn in order to roll the dice')
       );
     }
   }
 
   public movePawn(pawn: Pawn): Pawn | undefined {
-    if (this.pawns.includes(pawn) && this.latestDiceRoll) {
-      return pawn.moveToFieldAfter(this.latestDiceRoll);
+    if (this.pawns.includes(pawn) && this._turn$$.value?.diceRoll) {
+      return pawn.moveToFieldAfter(this._turn$$.value.diceRoll);
     } else {
       throw new Error("Player can only move it's own pawns");
     }
@@ -83,6 +77,10 @@ export class Player {
 
   public movePawnToStartField(): void {
     this.findPawnOnHomeField()?.moveToNextField();
+    this._turn$$.next({
+      diceRoll: -1,
+      isPlayerPuttingPawnOnStartField: true,
+    });
   }
 
   public findPawnOnHomeField(): Pawn | undefined {

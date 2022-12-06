@@ -1,34 +1,56 @@
+import { combineLatest, filter, map, Observable, takeWhile } from 'rxjs';
 import { Player } from './player';
+import { Turn } from './turn';
 
 export class FirstPlayerDeterminer {
-  private _firstPlayerIndex = -1;
-  public get firstPlayerIndex(): number {
-    return this._firstPlayerIndex;
+  public readonly firstPlayerIndex$: Observable<number>;
+
+  public constructor(players: readonly Player[]) {
+    this.firstPlayerIndex$ = combineLatest(
+      this.mapPlayersToTurns(players)
+    ).pipe(
+      map((turns) => this.mapTurnToDiceRolls(turns)),
+      takeWhile(
+        (diceRolls) => !this.isAbleToDetermineFirstPlayer(diceRolls),
+        true
+      ),
+      map((diceRolls) => {
+        return this.isAbleToDetermineFirstPlayer(diceRolls)
+          ? this.determineFirstPlayerIndex(diceRolls)
+          : -1;
+      })
+    );
+  }
+  private determineFirstPlayerIndex(diceRolls: readonly number[]): number {
+    return diceRolls.indexOf(this.getHighestDiceRoll(diceRolls));
   }
 
-  public determineFirstPlayer(players: readonly Player[]): void {
-    const diceRollsOfPlayers = this.getDiceRollsOfPlayers(players);
-    if (this.isAbleToDetermineFirstPlayer(diceRollsOfPlayers)) {
-      this._firstPlayerIndex = diceRollsOfPlayers.indexOf(
-        this.getHighestDiceRollBetweenPlayers(diceRollsOfPlayers)
-      );
-    }
+  private mapPlayersToTurns(
+    players: readonly Player[]
+  ): readonly Observable<Turn>[] {
+    return players.map(
+      (player) =>
+        player.turn$.pipe(filter((turn) => !!turn)) as Observable<Turn>
+    );
   }
 
-  private isAbleToDetermineFirstPlayer(diceRollsOfPlayers: number[]): boolean {
+  private mapTurnToDiceRolls(turns: readonly Turn[]): readonly number[] {
+    return turns.map((turn) => turn.diceRoll);
+  }
+
+  private isAbleToDetermineFirstPlayer(
+    diceRollsOfPlayers: readonly number[]
+  ): boolean {
     return (
-      !this.isFirstPlayerAlreadyDetermined() &&
       this.didAllPlayersRollTheDice(diceRollsOfPlayers) &&
       this.isHighestDiceRollOnlyOnce(diceRollsOfPlayers)
     );
   }
 
-  public isFirstPlayerAlreadyDetermined(): boolean {
-    return this.firstPlayerIndex > -1;
-  }
-
-  private didAllPlayersRollTheDice(diceRollsOfPlayers: number[]): boolean {
-    return diceRollsOfPlayers.length === 4;
+  private didAllPlayersRollTheDice(
+    diceRollsOfPlayers: readonly number[]
+  ): boolean {
+    return diceRollsOfPlayers.every((diceRoll) => diceRoll > -1);
   }
 
   private isHighestDiceRollOnlyOnce(
@@ -37,20 +59,12 @@ export class FirstPlayerDeterminer {
     return (
       diceRollsOfPlayers.filter(
         (diceRoll: number) =>
-          diceRoll === this.getHighestDiceRollBetweenPlayers(diceRollsOfPlayers)
+          diceRoll === this.getHighestDiceRoll(diceRollsOfPlayers)
       ).length === 1
     );
   }
 
-  private getDiceRollsOfPlayers(players: readonly Player[]): number[] {
-    return players
-      .map((player) => player.latestDiceRoll)
-      .filter((diceRoll) => diceRoll) as number[];
-  }
-
-  private getHighestDiceRollBetweenPlayers(
-    diceRollsOfPlayers: readonly number[]
-  ): number {
+  private getHighestDiceRoll(diceRollsOfPlayers: readonly number[]): number {
     return Math.max(...diceRollsOfPlayers);
   }
 }
