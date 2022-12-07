@@ -1,4 +1,4 @@
-import { BehaviorSubject, filter, merge, Observable } from 'rxjs';
+import { BehaviorSubject, filter, first, merge, Observable } from 'rxjs';
 import { GameEvent, GameEventInfo } from '../app/game-event-message';
 import { Board } from './board';
 import { allColors } from './color';
@@ -34,6 +34,8 @@ export class Game {
     this.currentPlayer.startTurn();
   }
 
+  public readonly turns$: Observable<Turn | undefined>;
+
   public constructor(
     private readonly dice = new Dice(),
     public readonly board = new Board(),
@@ -50,8 +52,13 @@ export class Game {
       next: (firstPlayerIndex) =>
         this.onFirstPlayerDeterminerUpdate(firstPlayerIndex),
     });
-    merge(...this.players.map((player) => player.turn$)).subscribe({
+    this.turns$ = merge(
+      ...this.players.map((player) => player.turn$)
+    );
+    this.turns$.subscribe({
       next: (turn?: Turn) => this.onTurnUpdated(turn),
+      error: console.error,
+      complete: () => console.log(`Bijoya game.ts[ln:56] turns complete!`),
     });
 
     // this.players.forEach((player) => {
@@ -133,8 +140,8 @@ export class Game {
     }
     console.log(
       `%cBijoya game.ts[ln:129] onFirstPlayerDeterminerUpdate()`,
-      'color: deeppink',
-      this.isDeterminingFirstPlayer
+      this.isDeterminingFirstPlayer,
+      firstPlayerIndex
     );
   }
 
@@ -150,7 +157,9 @@ export class Game {
   }
 
   public letPlayerExecuteActionFollowingDiceRoll(): void {
-    console.log(`Bijoya game.ts[ln:153] letPlayerExecuteActionFollowingDiceRoll()`)
+    console.log(
+      `Bijoya game.ts[ln:153] letPlayerExecuteActionFollowingDiceRoll()`
+    );
     switch (this.diceRollActionDeterminer.determineAction(this.currentPlayer)) {
       case DiceRollAction.MovePawnToStart:
         this.currentPlayerMovePawnToStartField();
