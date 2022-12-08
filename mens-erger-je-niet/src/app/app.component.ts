@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Game } from 'models/game';
 import { Pawn } from 'models/pawn';
+import { of } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -9,7 +10,7 @@ import { Pawn } from 'models/pawn';
 })
 export class AppComponent {
   public readonly game = new Game();
-  public readonly gameEventMessage$ = this.game.gameEvent$;
+  public readonly gameEventMessage$ = of();
 
   public onClickBtnRollDice(): void {
     this.game.currentPlayerRollDice();

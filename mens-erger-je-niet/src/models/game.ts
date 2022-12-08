@@ -1,4 +1,7 @@
-import { BehaviorSubject, filter, first, merge, Observable } from 'rxjs';
+import {
+  BehaviorSubject, merge,
+  Observable
+} from 'rxjs';
 import { GameEvent, GameEventInfo } from '../app/game-event-message';
 import { Board } from './board';
 import { allColors } from './color';
@@ -11,16 +14,16 @@ import { Player } from './player';
 import { Turn } from './turn';
 
 export class Game {
-  private readonly _gameEvent$$: BehaviorSubject<{
-    event: GameEvent;
-    info: GameEventInfo;
-  }>;
-  public get gameEvent$(): Observable<{
-    event: GameEvent;
-    info: GameEventInfo;
-  }> {
-    return this._gameEvent$$.asObservable();
-  }
+  // private readonly _gameEvent$$: BehaviorSubject<{
+  //   event: GameEvent;
+  //   info: GameEventInfo;
+  // }>;
+  // public get gameEvent$(): Observable<{
+  //   event: GameEvent;
+  //   info: GameEventInfo;
+  // }> {
+  //   return this._gameEvent$$.asObservable();
+  // }
   private isDeterminingFirstPlayer = true;
 
   private _currentPlayerIndex = 0;
@@ -29,6 +32,11 @@ export class Game {
   }
 
   private set currentPlayerIndex(value: number) {
+    console.log(
+      `Bijoya game.ts[ln:32] set currentplayerindex`,
+      this._currentPlayerIndex,
+      value
+    );
     this.currentPlayer.endTurn();
     this._currentPlayerIndex = value;
     this.currentPlayer.startTurn();
@@ -48,16 +56,15 @@ export class Game {
     private readonly firstPlayerDeterminer = new FirstPlayerDeterminer(players),
     private readonly diceRollActionDeterminer = new DiceRollActionDeterminer()
   ) {
+    console.log(`Bijoya game.ts[ln:59] turn$s test`, ...this.players.map((player) => player.turn$));
+    this.turns$ = merge(...this.players.map((player) => player.turn$));
     this.firstPlayerDeterminer.firstPlayerIndex$.subscribe({
       next: (firstPlayerIndex) =>
         this.onFirstPlayerDeterminerUpdate(firstPlayerIndex),
     });
-    this.turns$ = merge(
-      ...this.players.map((player) => player.turn$)
-    );
     this.turns$.subscribe({
       next: (turn?: Turn) => this.onTurnUpdated(turn),
-      error: console.error,
+      error:(err)=> console.log(`Bijoya game.ts[ln:66] turns error`, err),
       complete: () => console.log(`Bijoya game.ts[ln:56] turns complete!`),
     });
 
@@ -68,30 +75,30 @@ export class Game {
     this.letPlayersPutPawnsOnHomeFields();
 
     this.nextTurn(0);
-    const gameNotStartedEvent = {
-      event: GameEvent.GameNotStartedYet,
-      info: {
-        currentPlayerIndex: this._currentPlayerIndex,
-        // latestDiceRoll: this.players[this._currentPlayerIndex].turn$,
-      } as GameEventInfo,
-    };
-    this._gameEvent$$ = new BehaviorSubject(gameNotStartedEvent);
-    this.updateGameEvent(GameEvent.GameNotStartedYet);
+    // const gameNotStartedEvent = {
+    //   event: GameEvent.GameNotStartedYet,
+    //   info: {
+    //     currentPlayerIndex: this._currentPlayerIndex,
+    //     // latestDiceRoll: this.players[this._currentPlayerIndex].turn$,
+    //   } as GameEventInfo,
+    // };
+    // this._gameEvent$$ = new BehaviorSubject(gameNotStartedEvent);
+    // this.updateGameEvent(GameEvent.GameNotStartedYet);
   }
 
-  private updateGameEvent(
-    event: GameEvent,
-    nextPlayerIndex = this.nextPlayerIndex()
-  ): void {
-    this._gameEvent$$.next({
-      event,
-      info: {
-        currentPlayerIndex: this._currentPlayerIndex,
-        nextPlayerIndex,
-        // latestDiceRoll: this.players[this._currentPlayerIndex].turn$.,
-      },
-    });
-  }
+  // private updateGameEvent(
+  //   event: GameEvent,
+  //   nextPlayerIndex = this.nextPlayerIndex()
+  // ): void {
+  //   this._gameEvent$$.next({
+  //     event,
+  //     info: {
+  //       currentPlayerIndex: this._currentPlayerIndex,
+  //       nextPlayerIndex,
+  //       // latestDiceRoll: this.players[this._currentPlayerIndex].turn$.,
+  //     },
+  //   });
+  // }
 
   public get currentPlayer(): Player {
     return this.players[this.currentPlayerIndex];
@@ -122,30 +129,28 @@ export class Game {
   }
 
   private nextPlayerIndex(): number {
-    return this._currentPlayerIndex + 1 === 4
+    return this.currentPlayerIndex + 1 === 4
       ? 0
-      : this._currentPlayerIndex + 1;
+      : this.currentPlayerIndex + 1;
   }
 
   public currentPlayerRollDice(): void {
+    console.log(`Bijoya game.ts[ln:142] currentPlayerRollDice()`)
     this.currentPlayer.rollDice(this.dice);
   }
 
   private onFirstPlayerDeterminerUpdate(firstPlayerIndex: number): void {
     this.isDeterminingFirstPlayer = firstPlayerIndex === -1;
+
     if (this.isDeterminingFirstPlayer) {
       this.nextTurn();
     } else {
       this.nextTurn(firstPlayerIndex);
     }
-    console.log(
-      `%cBijoya game.ts[ln:129] onFirstPlayerDeterminerUpdate()`,
-      this.isDeterminingFirstPlayer,
-      firstPlayerIndex
-    );
   }
 
   private nextTurn(playerIndex: number = this.nextPlayerIndex()): void {
+    console.log(`Bijoya game.ts[ln:160] nextTurn`, playerIndex)
     this.currentPlayerIndex = playerIndex;
   }
 
@@ -174,19 +179,19 @@ export class Game {
   }
 
   private currentPlayerMovePawnToStartField(): void {
-    this.updateGameEvent(GameEvent.CurrentPlayerMovedPawnToStartField);
+    // this.updateGameEvent(GameEvent.CurrentPlayerMovedPawnToStartField);
     this.currentPlayer.movePawnToStartField();
   }
 
   private currentPlayerMovePawnFromStartField(): void {
-    this.updateGameEvent(GameEvent.CurrentPlayerMovedPawnFromStartField);
+    // this.updateGameEvent(GameEvent.CurrentPlayerMovedPawnFromStartField);
     this.currentPlayer.movePawnFromStartField();
     this.nextTurn();
   }
 
   public currentPlayerMovePawn(pawn: Pawn): void {
     if (this.currentPlayer.turn$) {
-      this.updateGameEvent(GameEvent.CurrentPlayerMovedPawn);
+      // this.updateGameEvent(GameEvent.CurrentPlayerMovedPawn);
       this.currentPlayer.movePawn(pawn);
       this.nextTurn();
     }

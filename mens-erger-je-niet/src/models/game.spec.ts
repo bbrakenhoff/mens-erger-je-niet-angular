@@ -1,5 +1,4 @@
-import { GameEvent } from 'app/game-event-message';
-import { BehaviorSubject, count, Observer, skip } from 'rxjs';
+import { BehaviorSubject, count } from 'rxjs';
 import { Board } from './board';
 import { Color } from './color';
 import { Dice } from './dice';
@@ -84,7 +83,7 @@ function createPlayerSpy(): PlayerSpy {
     endTurnSpy: spyOn(player, 'endTurn'),
   };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (player as any)['trurn$'] = turn$Spy;
+  (player as any)['turn$'] = turn$Spy;
 
   playerSpy.startTurnSpy.and.callFake(() => {
     playerSpy.turn$Spy.next({
@@ -95,6 +94,13 @@ function createPlayerSpy(): PlayerSpy {
 
   playerSpy.endTurnSpy.and.callFake(() => {
     playerSpy.turn$Spy.next(undefined);
+  });
+
+  playerSpy.movePawnToStartFieldSpy.and.callFake(() => {
+    playerSpy.turn$Spy.next({
+      diceRoll: -1,
+      isPlayerPuttingPawnOnStartField: true,
+    });
   });
 
   return playerSpy;
@@ -140,6 +146,7 @@ describe('Game', () => {
 
   const arrangeDetermineFirstPlayer = (): void => {
     firstPlayerDeterminerSpy.firstPlayerIndex$Spy.next(1);
+    firstPlayerDeterminerSpy.firstPlayerIndex$Spy.complete();
     // playerSpies[0].turn$Spy.next({
     //   diceRoll: 5,
     //   isPlayerPuttingPawnOnStartField: false,
@@ -151,13 +158,6 @@ describe('Game', () => {
     diceRollActionDeterminerSpy.determineActionSpy.and.returnValue(
       DiceRollAction.MovePawnToStart
     );
-    // playerSpies[1].findPawnOnHomeFieldSpy.and.returnValue(new Pawn(Color.Blue));
-    playerSpies[1].movePawnToStartFieldSpy.and.callFake(() => {
-      playerSpies[1].turn$Spy.next({
-        diceRoll: -1,
-        isPlayerPuttingPawnOnStartField: true,
-      });
-    });
 
     playerSpies[1].rollDiceSpy.and.callFake(() => {
       console.log(`Bijoya game.spec.ts[ln:141] fake update roll dice!`);
@@ -314,7 +314,7 @@ describe('Game', () => {
       // });
     });
 
-    fit('should give the turn to player with highest dice roll when first player determined', () => {
+    it('should give the turn to player with highest dice roll when first player determined', () => {
       arrangeDetermineFirstPlayer();
 
       expect(game.currentPlayerIndex).toBe(1);
@@ -329,7 +329,7 @@ describe('Game', () => {
     });
 
     fit('should let player put a pawn on start field when dice roll is 6', (done: DoneFn) => {
-     game.turns$.pipe(count()).subscribe({
+      game.turns$.pipe(count()).subscribe({
         next: (turn) => {
           expect(turn).toBe(6);
           // expect(
@@ -339,9 +339,10 @@ describe('Game', () => {
           // expect(game.currentPlayerIndex).toBe(1);
           done();
         },
+        complete: () => done.fail('completed'),
         error: done.fail,
       });
-      arrangeMovePawnToStartField();
+      arrangeDetermineFirstPlayer();
 
       //       expect(gameEventObserver.next.calls.count()).toBe(2);
       //       const params = gameEventObserver.next.calls.mostRecent().args[0];
