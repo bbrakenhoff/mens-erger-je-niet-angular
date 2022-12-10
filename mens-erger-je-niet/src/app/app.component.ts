@@ -1,7 +1,5 @@
 import { Component } from '@angular/core';
-import { Game } from 'models/game';
 import { Pawn } from 'models/pawn';
-import { of } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -9,11 +7,11 @@ import { of } from 'rxjs';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
-  public readonly game = new Game();
-  public readonly gameEventMessage$ = of();
+  // public readonly game = new BoardGame();
+  // public readonly gameEventMessage$ = of();
 
   public onClickBtnRollDice(): void {
-    this.game.currentPlayerRollDice();
+    // this.game.currentPlayerRollDice();
   }
 
   public onClickPawn(pawn: Pawn): void {
@@ -21,6 +19,6 @@ export class AppComponent {
       `%cBijoya app.component.ts[ln:19] onClickPawn`,
       'color: deeppink'
     );
-    this.game.currentPlayerMovePawn(pawn);
+    // this.game.currentPlayerMovePawn(pawn);
   }
 }

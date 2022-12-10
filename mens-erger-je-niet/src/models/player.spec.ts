@@ -8,6 +8,7 @@ import { NormalField } from './fields/normal-field';
 import { StartField } from './fields/start-field';
 import { Pawn } from './pawn';
 import { Player } from './player';
+import { Turn } from './turn';
 
 type PawnSpy = {
   pawn: Pawn;
@@ -104,7 +105,7 @@ describe('Player', () => {
     it('should update turn$ with an empty turn', (done: DoneFn) => {
       player.endTurn();
       player.turn$.pipe(skip(1)).subscribe({
-        next: (value) => {
+        next: (value: Turn) => {
           expect(value).toEqual({
             diceRoll: -1,
             isPlayerPuttingPawnOnStartField: false,
@@ -120,7 +121,7 @@ describe('Player', () => {
   describe('endTurn()', () => {
     it('should update turn$ with undefined', (done: DoneFn) => {
       player.turn$.pipe(skip(1)).subscribe({
-        next: (value) => {
+        next: (value: Turn) => {
           expect(value).toBeUndefined();
           done();
         },
@@ -133,7 +134,7 @@ describe('Player', () => {
   describe('rollDice(dice)', () => {
     it('should roll the dice and remember number of eyes rolled', (done: DoneFn) => {
       player.turn$.pipe(skip(1)).subscribe({
-        next: (value) => {
+        next: (value: Turn) => {
           expect(value).toEqual({
             diceRoll: 3,
             isPlayerPuttingPawnOnStartField: false,
@@ -148,7 +149,7 @@ describe('Player', () => {
     it('should roll the dice and remember number of eyes rolled when putting pawn on start field', (done: DoneFn) => {
       player.movePawnToStartField();
       player.turn$.pipe(skip(1)).subscribe({
-        next: (value) => {
+        next: (value: Turn) => {
           expect(value).toEqual({
             diceRoll: 3,
             isPlayerPuttingPawnOnStartField: true,
@@ -165,7 +166,7 @@ describe('Player', () => {
       player.endTurn();
       player.turn$.pipe(skip(1)).subscribe({
         next: () => done.fail(),
-        error: (error) => {
+        error: (error: Error) => {
           expect(error).toEqual(
             Error('Player must have an active turn in order to roll the dice')
           );
@@ -216,7 +217,7 @@ describe('Player', () => {
       pawnsSpies[3].pawn.field = normalField3;
 
       player.turn$.pipe(skip(1)).subscribe({
-        next: (turn?) => {
+        next: (turn?: Turn) => {
           expect(turn).toEqual({
             diceRoll: -1,
             isPlayerPuttingPawnOnStartField: true,
