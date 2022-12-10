@@ -105,7 +105,7 @@ describe('Player', () => {
     it('should update turn$ with an empty turn', (done: DoneFn) => {
       player.endTurn();
       player.turn$.pipe(skip(1)).subscribe({
-        next: (value: Turn) => {
+        next: (value?: Turn) => {
           expect(value).toEqual({
             diceRoll: -1,
             isPlayerPuttingPawnOnStartField: false,
@@ -121,7 +121,7 @@ describe('Player', () => {
   describe('endTurn()', () => {
     it('should update turn$ with undefined', (done: DoneFn) => {
       player.turn$.pipe(skip(1)).subscribe({
-        next: (value: Turn) => {
+        next: (value?: Turn) => {
           expect(value).toBeUndefined();
           done();
         },
@@ -134,7 +134,7 @@ describe('Player', () => {
   describe('rollDice(dice)', () => {
     it('should roll the dice and remember number of eyes rolled', (done: DoneFn) => {
       player.turn$.pipe(skip(1)).subscribe({
-        next: (value: Turn) => {
+        next: (value?: Turn) => {
           expect(value).toEqual({
             diceRoll: 3,
             isPlayerPuttingPawnOnStartField: false,
@@ -149,7 +149,7 @@ describe('Player', () => {
     it('should roll the dice and remember number of eyes rolled when putting pawn on start field', (done: DoneFn) => {
       player.movePawnToStartField();
       player.turn$.pipe(skip(1)).subscribe({
-        next: (value: Turn) => {
+        next: (value?: Turn) => {
           expect(value).toEqual({
             diceRoll: 3,
             isPlayerPuttingPawnOnStartField: true,

@@ -4,7 +4,8 @@ import {
   map,
   Observable,
   startWith,
-  takeWhile
+  takeWhile,
+  tap,
 } from 'rxjs';
 import { Player } from './player';
 import { Turn } from './turn';
@@ -16,6 +17,10 @@ export class FirstPlayerDeterminer {
     this.firstPlayerIndex$ = combineLatest(
       this.mapPlayersToTurns(players)
     ).pipe(
+      tap((turns) =>
+        console.log(`🐝 first-player-determiner.ts[ln:19] 1`, turns)
+      ),
+      map((turns: (Turn | undefined)[]) => turns as Turn[]),
       map((turns: Turn[]) => this.mapTurnToDiceRolls(turns)),
       takeWhile(
         (diceRolls: number[]) => !this.isAbleToDetermineFirstPlayer(diceRolls),
@@ -32,41 +37,28 @@ export class FirstPlayerDeterminer {
 
   private mapPlayersToTurns(
     players: readonly Player[]
-  ): readonly Observable<Turn>[] {
-    return players.map(
-      (player) =>
-        player.turn$.pipe(filter((turn?: Turn) => !!turn)) as Observable<Turn>
+  ): readonly Observable<Turn | undefined>[] {
+    return players.map((player) =>
+      player.turn$.pipe(filter((turn) => turn !== undefined))
     );
   }
 
-  private mapTurnToDiceRolls(turns: readonly Turn[]): readonly number[] {
-    console.log(
-      `Bijoya first-player-determiner.ts[ln:43] mapTurnToDiceRolls()`
-    );
+  private mapTurnToDiceRolls(turns: Turn[]): number[] {
     return turns.map((turn) => turn.diceRoll);
   }
 
-  private isAbleToDetermineFirstPlayer(
-    diceRollsOfPlayers: readonly number[]
-  ): boolean {
-    console.log(
-      `Bijoya first-player-determiner.ts[ln:49] isAbleToDetermineFirstPlayer()`
-    );
+  private isAbleToDetermineFirstPlayer(diceRollsOfPlayers: number[]): boolean {
     return (
       this.didAllPlayersRollTheDice(diceRollsOfPlayers) &&
       this.isHighestDiceRollOnlyOnce(diceRollsOfPlayers)
     );
   }
 
-  private didAllPlayersRollTheDice(
-    diceRollsOfPlayers: readonly number[]
-  ): boolean {
+  private didAllPlayersRollTheDice(diceRollsOfPlayers: number[]): boolean {
     return diceRollsOfPlayers.every((diceRoll) => diceRoll > -1);
   }
 
-  private isHighestDiceRollOnlyOnce(
-    diceRollsOfPlayers: readonly number[]
-  ): boolean {
+  private isHighestDiceRollOnlyOnce(diceRollsOfPlayers: number[]): boolean {
     return (
       diceRollsOfPlayers.filter(
         (diceRoll: number) =>
@@ -75,11 +67,11 @@ export class FirstPlayerDeterminer {
     );
   }
 
-  private getHighestDiceRoll(diceRollsOfPlayers: readonly number[]): number {
+  private getHighestDiceRoll(diceRollsOfPlayers: number[]): number {
     return Math.max(...diceRollsOfPlayers);
   }
 
-  private determineFirstPlayerIndex(diceRolls: readonly number[]): number {
+  private determineFirstPlayerIndex(diceRolls: number[]): number {
     return diceRolls.indexOf(this.getHighestDiceRoll(diceRolls));
   }
 }

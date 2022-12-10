@@ -42,7 +42,7 @@ fdescribe('FirstPlayerDeterminer', () => {
   });
 
   describe('determineFirstPlayer(players, currentPlayerIndex)', () => {
-    it('should return -1 when none of the players rolled the dice yet', (done: DoneFn) => {
+    fit('should return -1 when none of the players rolled the dice yet', (done: DoneFn) => {
       firstPlayerDeterminer.firstPlayerIndex$.subscribe({
         next: (value: number) => {
           expect(value).toBe(-1);
@@ -55,6 +55,7 @@ fdescribe('FirstPlayerDeterminer', () => {
     fit('should return -1 when not all players have rolled the dice yet', (done: DoneFn) => {
       firstPlayerDeterminer.firstPlayerIndex$.pipe(take(1)).subscribe({
         next: (value: number) => {
+          console.log(`🐝 first-player-determiner.spec.ts[ln:58] test`);
           expect(value).toBe(-1);
           done();
         },
@@ -66,8 +67,8 @@ fdescribe('FirstPlayerDeterminer', () => {
       playerSpies[2].rollDice(5);
     });
 
-    it('should return undefined when first player not determined and multiple players have the highest dice roll', (done: DoneFn) => {
-      firstPlayerDeterminer.firstPlayerIndex$.pipe(skip(9)).subscribe({
+    it('should return -1 when first player not determined and multiple players have the highest dice roll', (done: DoneFn) => {
+      firstPlayerDeterminer.firstPlayerIndex$.pipe(count()).subscribe({
         next: (value: number) => {
           expect(value).toBe(-1);
           done();
@@ -81,7 +82,7 @@ fdescribe('FirstPlayerDeterminer', () => {
     });
 
     it('should return index of first player when first player determined', (done: DoneFn) => {
-      firstPlayerDeterminer.firstPlayerIndex$.pipe(skip(8)).subscribe({
+      firstPlayerDeterminer.firstPlayerIndex$.pipe(skip(7)).subscribe({
         next: (value: number) => {
           expect(value).toBe(2);
           done();
