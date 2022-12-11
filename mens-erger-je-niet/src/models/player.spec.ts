@@ -1,4 +1,5 @@
-import { skip } from 'rxjs';
+import { ReplaySubject, skip } from 'rxjs';
+import { TestScheduler } from 'rxjs/testing';
 import { Color } from './color';
 import { Dice } from './dice';
 import { Field } from './fields/field';
@@ -32,11 +33,13 @@ describe('Player', () => {
   let pawnsSpies: PawnSpy[];
   let otherPlayersPawnSpy: PawnSpy;
   let player: Player;
-  let dice: Dice;
+  let diceSpy: Dice;
+
+  let testScheduler: TestScheduler;
 
   beforeEach(() => {
-    dice = new Dice();
-    spyOn(dice, 'roll').and.returnValue(latestDiceRoll);
+    diceSpy = new Dice();
+    spyOn(diceSpy, 'roll').and.returnValue(latestDiceRoll);
 
     otherPlayersPawnSpy = createPawnSpy(Color.Red);
 
@@ -44,6 +47,10 @@ describe('Player', () => {
     for (let i = 0; i < 4; i++) {
       pawnsSpies.push(createPawnSpy());
     }
+
+    testScheduler = new TestScheduler((actual, expected) => {
+      expect(actual).toEqual(expected);
+    });
 
     player = new Player();
     player.pawns = pawnsSpies.map((pawnSpy) => pawnSpy.pawn);
@@ -102,78 +109,92 @@ describe('Player', () => {
   });
 
   describe('startTurn()', () => {
-    it('should update turn$ with an empty turn', (done: DoneFn) => {
-      player.endTurn();
-      player.turn$.pipe(skip(1)).subscribe({
-        next: (value?: Turn) => {
-          expect(value).toEqual({
-            diceRoll: -1,
-            isPlayerPuttingPawnOnStartField: false,
-          });
-          done();
-        },
-        error: done.fail,
+    it('should update turn$ with an empty turn', () => {
+      testScheduler.run(({ expectObservable }) => {
+        player = new Player();
+        const replaySubject$$ = new ReplaySubject<Turn | undefined>();
+        player.turn$.subscribe(replaySubject$$);
+
+        player.startTurn();
+
+        expectObservable(replaySubject$$).toBe('(ab)', {
+          a: undefined,
+          b: { diceRoll: -1, isPlayerPuttingPawnOnStartField: false },
+        });
       });
-      player.startTurn();
     });
   });
 
   describe('endTurn()', () => {
-    it('should update turn$ with undefined', (done: DoneFn) => {
-      player.turn$.pipe(skip(1)).subscribe({
-        next: (value?: Turn) => {
-          expect(value).toBeUndefined();
-          done();
-        },
-        error: done.fail,
+    it('should update turn$ with undefined', () => {
+      testScheduler.run(({ expectObservable }) => {
+        player = new Player();
+        const replaySubject$$ = new ReplaySubject<Turn | undefined>();
+        player.turn$.subscribe(replaySubject$$);
+
+        player.startTurn();
+        player.endTurn();
+
+        expectObservable(replaySubject$$).toBe('(abc)', {
+          a: undefined,
+          b: { diceRoll: -1, isPlayerPuttingPawnOnStartField: false },
+          c: undefined,
+        });
       });
-      player.endTurn();
     });
   });
 
   describe('rollDice(dice)', () => {
-    it('should roll the dice and remember number of eyes rolled', (done: DoneFn) => {
-      player.turn$.pipe(skip(1)).subscribe({
-        next: (value?: Turn) => {
-          expect(value).toEqual({
-            diceRoll: 3,
-            isPlayerPuttingPawnOnStartField: false,
-          });
-          done();
-        },
-        error: done.fail,
+    it('should roll the dice and remember number of eyes rolled', () => {
+      testScheduler.run(({ expectObservable }) => {
+        player = new Player();
+        const replaySubject$$ = new ReplaySubject<Turn | undefined>();
+        player.turn$.subscribe(replaySubject$$);
+
+        player.startTurn();
+        player.rollDice(diceSpy);
+
+        expectObservable(replaySubject$$).toBe('(abc)', {
+          a: undefined,
+          b: { diceRoll: -1, isPlayerPuttingPawnOnStartField: false },
+          c: { diceRoll: 3, isPlayerPuttingPawnOnStartField: false },
+        });
       });
-      player.rollDice(dice);
     });
 
-    it('should roll the dice and remember number of eyes rolled when putting pawn on start field', (done: DoneFn) => {
-      player.movePawnToStartField();
-      player.turn$.pipe(skip(1)).subscribe({
-        next: (value?: Turn) => {
-          expect(value).toEqual({
-            diceRoll: 3,
-            isPlayerPuttingPawnOnStartField: true,
-          });
-          done();
-        },
-        error: done.fail,
-      });
+    it('should roll the dice and remember number of eyes rolled when putting pawn on start field', () => {
+      testScheduler.run(({ expectObservable }) => {
+        player = new Player();
+        const replaySubject$$ = new ReplaySubject<Turn | undefined>();
+        player.turn$.subscribe(replaySubject$$);
 
-      player.rollDice(dice);
+        player.startTurn();
+        player.movePawnToStartField();
+        player.rollDice(diceSpy);
+
+        expectObservable(replaySubject$$).toBe('(abcd)', {
+          a: undefined,
+          b: { diceRoll: -1, isPlayerPuttingPawnOnStartField: false },
+          c: { diceRoll: -1, isPlayerPuttingPawnOnStartField: true },
+          d: { diceRoll: 3, isPlayerPuttingPawnOnStartField: true },
+        });
+      });
     });
 
-    it('should throw an error when player tries to roll the dice while not having a turn', (done: DoneFn) => {
-      player.endTurn();
-      player.turn$.pipe(skip(1)).subscribe({
-        next: () => done.fail(),
-        error: (error: Error) => {
-          expect(error).toEqual(
-            Error('Player must have an active turn in order to roll the dice')
-          );
-          done();
-        },
+    it('WITH MARBLES should throw an error when player tries to roll the dice while not having a turn', () => {
+      testScheduler.run(({ expectObservable }) => {
+        player = new Player();
+        const replaySubject$$ = new ReplaySubject<Turn | undefined>();
+        player.turn$.subscribe(replaySubject$$);
+
+        player.rollDice(diceSpy);
+
+        expectObservable(replaySubject$$).toBe(
+          '(a#)',
+          { a: undefined },
+          Error('Player must have an active turn in order to roll the dice')
+        );
       });
-      player.rollDice(dice);
     });
   });
 
@@ -206,33 +227,35 @@ describe('Player', () => {
   });
 
   describe('movePawnToStartField()', () => {
-    it('should move the first pawn found on a home field to start field', (done: DoneFn) => {
-      const normalField0 = new NormalField(Color.Blue, 0);
-      pawnsSpies[0].pawn.field = normalField0;
-      const normalField1 = new NormalField(Color.Blue, 1);
-      pawnsSpies[1].pawn.field = normalField1;
-      const homeField = new HomeField(Color.Blue);
-      pawnsSpies[2].pawn.field = homeField;
-      const normalField3 = new NormalField(Color.Blue, 3);
-      pawnsSpies[3].pawn.field = normalField3;
+    it('should move the first pawn found on a home field to start field', () => {
+      testScheduler.run(({ expectObservable }) => {
+        const normalField0 = new NormalField(Color.Blue, 0);
+        pawnsSpies[0].pawn.field = normalField0;
+        const normalField1 = new NormalField(Color.Blue, 1);
+        pawnsSpies[1].pawn.field = normalField1;
+        const homeField = new HomeField(Color.Blue);
+        pawnsSpies[2].pawn.field = homeField;
+        const normalField3 = new NormalField(Color.Blue, 3);
+        pawnsSpies[3].pawn.field = normalField3;
 
-      player.turn$.pipe(skip(1)).subscribe({
-        next: (turn?: Turn) => {
-          expect(turn).toEqual({
-            diceRoll: -1,
-            isPlayerPuttingPawnOnStartField: true,
-          });
-          expect(pawnsSpies[0].moveToNextFieldSpy).not.toHaveBeenCalled();
-          expect(pawnsSpies[1].moveToNextFieldSpy).not.toHaveBeenCalled();
-          expect(pawnsSpies[2].moveToNextFieldSpy).toHaveBeenCalled();
-          expect(pawnsSpies[3].moveToNextFieldSpy).not.toHaveBeenCalled();
-          done();
-        },
-        error: done.fail,
+        const replaySubject$$ = new ReplaySubject<Turn | undefined>();
+        player.turn$.subscribe(replaySubject$$);
+
+        player.movePawnToStartField();
+
+        expectObservable(replaySubject$$).toBe('(ab)', {
+          // a: undefined,
+          a: { diceRoll: -1, isPlayerPuttingPawnOnStartField: false },
+          b: { diceRoll: -1, isPlayerPuttingPawnOnStartField: true },
+        });
+
+        expect(pawnsSpies[0].moveToNextFieldSpy).not.toHaveBeenCalled();
+        expect(pawnsSpies[1].moveToNextFieldSpy).not.toHaveBeenCalled();
+        expect(pawnsSpies[2].moveToNextFieldSpy).toHaveBeenCalled();
+        expect(pawnsSpies[3].moveToNextFieldSpy).not.toHaveBeenCalled();
       });
-
-      player.movePawnToStartField();
     });
+
 
     it('should do nothing when no pawns on home field', () => {
       const normalField0 = new NormalField(Color.Blue, 0);
@@ -260,7 +283,7 @@ describe('Player', () => {
       pawnsSpies[2].pawn.field = new StartField(Color.Blue);
       pawnsSpies[3].pawn.field = new NormalField(Color.Blue, 2);
 
-      player.rollDice(dice);
+      player.rollDice(diceSpy);
 
       expect(player.movePawnFromStartField()).toBeUndefined();
 
@@ -298,7 +321,7 @@ describe('Player', () => {
       pawnsSpies[1].pawn.field = normalFields[0];
       normalFields[0].pawn = pawnsSpies[1].pawn;
 
-      player.rollDice(dice);
+      player.rollDice(diceSpy);
     });
 
     it("should throw an error when trying to move another player's pawn", () => {

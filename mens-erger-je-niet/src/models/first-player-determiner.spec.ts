@@ -26,7 +26,7 @@ function createPlayerSpy(): PlayerSpy {
   };
 }
 
-fdescribe('FirstPlayerDeterminer', () => {
+describe('FirstPlayerDeterminer', () => {
   let playerSpies: PlayerSpy[];
   let firstPlayerDeterminer: FirstPlayerDeterminer;
 

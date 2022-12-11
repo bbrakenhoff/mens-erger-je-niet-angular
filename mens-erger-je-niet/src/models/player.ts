@@ -10,10 +10,7 @@ import { Turn } from './turn';
 export class Player {
   public pawns: Pawn[] = [];
 
-  private readonly _turn$$ = new BehaviorSubject<Turn | undefined>({
-    diceRoll: -1,
-    isPlayerPuttingPawnOnStartField: false,
-  });
+  private readonly _turn$$ = new BehaviorSubject<Turn | undefined>(undefined);
   public readonly turn$ = this._turn$$.asObservable();
 
   public get pawnColor(): Color {
