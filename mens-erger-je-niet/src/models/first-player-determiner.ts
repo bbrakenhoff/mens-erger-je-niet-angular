@@ -15,18 +15,14 @@ export class FirstPlayerDeterminer {
 
   public constructor(players: readonly Player[]) {
     this.firstPlayerIndex$ = combineLatest(
-      this.mapPlayersToTurns(players)
+      this.mapPlayersToDiceRolls(players)
     ).pipe(
-      tap((turns) =>
-        console.log(`🐝 first-player-determiner.ts[ln:19] 1`, turns)
-      ),
-      map((turns: (Turn | undefined)[]) => turns as Turn[]),
-      map((turns: Turn[]) => this.mapTurnToDiceRolls(turns)),
       takeWhile(
         (diceRolls: number[]) => !this.isAbleToDetermineFirstPlayer(diceRolls),
         true
       ),
       map((diceRolls: number[]) => {
+        console.log(`🐝 first-player-determiner.ts[ln:35] find first index!`);
         return this.isAbleToDetermineFirstPlayer(diceRolls)
           ? this.determineFirstPlayerIndex(diceRolls)
           : -1;
@@ -35,19 +31,32 @@ export class FirstPlayerDeterminer {
     );
   }
 
-  private mapPlayersToTurns(
+  private mapPlayersToDiceRolls(
     players: readonly Player[]
-  ): readonly Observable<Turn | undefined>[] {
+  ): readonly Observable<number>[] {
     return players.map((player) =>
-      player.turn$.pipe(filter((turn) => turn !== undefined))
+      player.turn$.pipe(
+        filter((turn) => turn !== undefined),
+        map((turn?: Turn) => turn as Turn), // Is not optional anymore after filtering
+        map((turn: Turn) => turn.diceRoll),
+        tap((diceRoll) =>
+          console.log(
+            `🐝 first-player-determiner.ts[ln:45] map to diceroll`,
+            diceRoll
+          )
+        )
+      )
     );
   }
 
-  private mapTurnToDiceRolls(turns: Turn[]): number[] {
-    return turns.map((turn) => turn.diceRoll);
-  }
+  // private mapTurnToDiceRolls(turns: Turn[]): number[] {
+  //   return turns.map((turn) => turn.diceRoll);
+  // }
 
   private isAbleToDetermineFirstPlayer(diceRollsOfPlayers: number[]): boolean {
+    console.log(
+      `🐝 first-player-determiner.ts[ln:56] isAbleToDetermineFirstPlayer()`
+    );
     return (
       this.didAllPlayersRollTheDice(diceRollsOfPlayers) &&
       this.isHighestDiceRollOnlyOnce(diceRollsOfPlayers)

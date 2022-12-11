@@ -1,4 +1,5 @@
-import { BehaviorSubject, count, skip, take } from 'rxjs';
+import { BehaviorSubject, ReplaySubject } from 'rxjs';
+import { TestScheduler } from 'rxjs/testing';
 import { FirstPlayerDeterminer } from './first-player-determiner';
 import { Player } from './player';
 import { Turn } from './turn';
@@ -29,6 +30,8 @@ fdescribe('FirstPlayerDeterminer', () => {
   let playerSpies: PlayerSpy[];
   let firstPlayerDeterminer: FirstPlayerDeterminer;
 
+  let testScheduler: TestScheduler;
+
   beforeEach(() => {
     playerSpies = [
       createPlayerSpy(),
@@ -39,83 +42,94 @@ fdescribe('FirstPlayerDeterminer', () => {
     firstPlayerDeterminer = new FirstPlayerDeterminer(
       playerSpies.map((spy) => spy.player)
     );
+
+    testScheduler = new TestScheduler((actual, expected) => {
+      expect(actual).toEqual(expected);
+    });
   });
 
   describe('determineFirstPlayer(players, currentPlayerIndex)', () => {
-    fit('should return -1 when none of the players rolled the dice yet', (done: DoneFn) => {
-      firstPlayerDeterminer.firstPlayerIndex$.subscribe({
-        next: (value: number) => {
-          expect(value).toBe(-1);
-          done();
-        },
-        error: done.fail,
+    it('should return -1 when none of the players rolled the dice yet', () => {
+      testScheduler.run(({ expectObservable }) => {
+        expectObservable(firstPlayerDeterminer.firstPlayerIndex$).toBe('a', {
+          a: -1,
+        });
       });
     });
 
-    fit('should return -1 when not all players have rolled the dice yet', (done: DoneFn) => {
-      firstPlayerDeterminer.firstPlayerIndex$.pipe(take(1)).subscribe({
-        next: (value: number) => {
-          console.log(`🐝 first-player-determiner.spec.ts[ln:58] test`);
-          expect(value).toBe(-1);
-          done();
-        },
-        complete: done.fail,
-        error: done.fail,
+    it('should return -1 when not all players have rolled the dice yet', () => {
+      testScheduler.run(({ expectObservable }) => {
+        const replaySubject$$ = new ReplaySubject<number>();
+        firstPlayerDeterminer.firstPlayerIndex$.subscribe(replaySubject$$);
+
+        playerSpies[0].rollDice(3);
+        playerSpies[1].rollDice(4);
+        playerSpies[2].rollDice(5);
+
+        expectObservable(replaySubject$$).toBe('(a)', {
+          a: -1,
+        });
       });
-      playerSpies[0].rollDice(3);
-      playerSpies[1].rollDice(4);
-      playerSpies[2].rollDice(5);
     });
 
-    it('should return -1 when first player not determined and multiple players have the highest dice roll', (done: DoneFn) => {
-      firstPlayerDeterminer.firstPlayerIndex$.pipe(count()).subscribe({
-        next: (value: number) => {
-          expect(value).toBe(-1);
-          done();
-        },
-        error: done.fail,
+    it('should return -1 when first player not determined and multiple players have the highest dice roll', () => {
+      testScheduler.run(({ expectObservable }) => {
+        const replaySubject$$ = new ReplaySubject<number>();
+        firstPlayerDeterminer.firstPlayerIndex$.subscribe(replaySubject$$);
+
+        playerSpies[0].rollDice(3);
+        playerSpies[1].rollDice(4);
+        playerSpies[2].rollDice(5);
+        playerSpies[3].rollDice(5);
+
+        expectObservable(replaySubject$$).toBe('(abc)', {
+          a: -1,
+          b: -1,
+          c: -1,
+        });
       });
-      playerSpies[0].rollDice(3);
-      playerSpies[1].rollDice(4);
-      playerSpies[2].rollDice(5);
-      playerSpies[3].rollDice(5);
     });
 
-    it('should return index of first player when first player determined', (done: DoneFn) => {
-      firstPlayerDeterminer.firstPlayerIndex$.pipe(skip(7)).subscribe({
-        next: (value: number) => {
-          expect(value).toBe(2);
-          done();
-        },
-        complete: done,
-        error: done.fail,
-      });
+    it('should return index of first player when first player determined', () => {
+      testScheduler.run(({ expectObservable }) => {
+        const replaySubject$$ = new ReplaySubject<number>();
+        firstPlayerDeterminer.firstPlayerIndex$.subscribe(replaySubject$$);
 
-      playerSpies[0].rollDice(3);
-      playerSpies[1].rollDice(4);
-      playerSpies[2].rollDice(6);
-      playerSpies[3].rollDice(5);
+        playerSpies[0].rollDice(3);
+        playerSpies[1].rollDice(4);
+        playerSpies[2].rollDice(6);
+        playerSpies[3].rollDice(5);
+
+        expectObservable(replaySubject$$).toBe('(abc|)', {
+          a: -1,
+          b: -1,
+          c: 2,
+        });
+      });
     });
 
-    it('should return the index of the first player when first player already determined', (done: DoneFn) => {
-      firstPlayerDeterminer.firstPlayerIndex$.pipe(count()).subscribe({
-        next: (count: number) => {
-          expect(count).toBe(9);
-          done();
-        },
-        complete: done,
-        error: done.fail,
+    it('should return the index of the first player when first player already determined', () => {
+      testScheduler.run(({ expectObservable }) => {
+        const replaySubject$$ = new ReplaySubject<number>();
+        firstPlayerDeterminer.firstPlayerIndex$.subscribe(replaySubject$$);
+
+        playerSpies[0].rollDice(3);
+        playerSpies[1].rollDice(4);
+        playerSpies[2].rollDice(6);
+        playerSpies[3].rollDice(5);
+
+        playerSpies[0].rollDice(4);
+        playerSpies[1].rollDice(3);
+        playerSpies[2].rollDice(2);
+        playerSpies[3].rollDice(1);
+
+        expectObservable(replaySubject$$).toBe('(abc|)', {
+          a: -1,
+          b: -1,
+          c: 2,
+          d: -1,
+        });
       });
-
-      playerSpies[0].rollDice(3);
-      playerSpies[1].rollDice(4);
-      playerSpies[2].rollDice(5);
-      playerSpies[3].rollDice(6);
-
-      playerSpies[0].rollDice(4);
-      playerSpies[1].rollDice(3);
-      playerSpies[2].rollDice(2);
-      playerSpies[3].rollDice(1);
     });
   });
 });
