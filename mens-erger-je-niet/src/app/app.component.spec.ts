@@ -1,9 +1,6 @@
-import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { AppComponent } from './app.component';
-import { BoardComponent } from './board/board.component';
-import { FieldComponent } from './board/field/field.component';
 
 describe('AppComponent', () => {
   let fixture: ComponentFixture<AppComponent>;
@@ -12,8 +9,7 @@ describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [RouterTestingModule],
-      declarations: [AppComponent, BoardComponent, FieldComponent],
-      schemas: [CUSTOM_ELEMENTS_SCHEMA],
+      declarations: [AppComponent],
     }).compileComponents();
   });
 
