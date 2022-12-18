@@ -1,3 +1,7 @@
+import { Inject, Injectable } from '@angular/core';
+import { Dice } from 'models/dice';
+import { Player } from 'models/player';
+import { Turn } from 'models/turn';
 import {
   BehaviorSubject,
   combineLatest,
@@ -11,11 +15,9 @@ import {
   takeWhile,
   tap,
 } from 'rxjs';
-import { Dice } from './dice';
-import { Player } from './player';
-import { Turn } from './turn';
 
-export class FirstPlayerDeterminer {
+@Injectable({ providedIn: 'root' })
+export class DetermineFirstPlayerService {
   public readonly firstPlayerIndex$: Observable<number>;
 
   private readonly _currentPlayerIndex$$ = new BehaviorSubject(-1);
@@ -37,13 +39,10 @@ export class FirstPlayerDeterminer {
   );
 
   public constructor(
-    private readonly players: readonly Player[] = [
-      new Player(),
-      new Player(),
-      new Player(),
-      new Player(),
-    ],
-    private readonly dice = new Dice()
+    @Inject('Players')
+    private readonly players: readonly Player[],
+    @Inject('Dice')
+    private readonly dice: Dice
   ) {
     this.firstPlayerIndex$ = combineLatest(
       this.mapPlayersToDiceRolls(players)

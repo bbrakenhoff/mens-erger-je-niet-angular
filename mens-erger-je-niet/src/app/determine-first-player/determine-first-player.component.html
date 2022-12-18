@@ -1,0 +1,18 @@
+<div class="row">
+  <div class="col" *ngIf="(firstPlayerIndex$ | async) > -1; else determining">
+    <span class="fs-1">First player determined!</span>
+  </div>
+  <ng-template #determining>
+    <div class="col" *ngIf="diceRoll$ | async as diceRoll; else t">
+      <span *ngIf="diceRoll.diceRoll; else empty"
+        >Player
+        <pre>{{ diceRoll | json }}</pre>
+      </span>
+      <ng-template #empty><span>-</span></ng-template>
+    </div>
+    <ng-template #t> <span>test</span></ng-template>
+    <button (click)="onRollButtonClick()" class="btn bt-primary">
+      Roll dice
+    </button>
+  </ng-template>
+</div>
