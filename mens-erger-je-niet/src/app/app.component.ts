@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
+import { FirstPlayerDeterminer } from 'models/first-player-determiner';
 import { Pawn } from 'models/pawn';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -7,18 +9,16 @@ import { Pawn } from 'models/pawn';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
-  // public readonly game = new BoardGame();
-  // public readonly gameEventMessage$ = of();
+  private readonly firstPlayerDeterminer = new FirstPlayerDeterminer();
 
-  public onClickBtnRollDice(): void {
-    // this.game.currentPlayerRollDice();
-  }
+  public readonly diceRoll$: Observable<{
+    playerIndex: number;
+    diceRoll: number;
+  }> = this.firstPlayerDeterminer.currentPlayerDiceRoll$;
+  public readonly firstPlayerIndex$: Observable<number> =
+    this.firstPlayerDeterminer.firstPlayerIndex$;
 
-  public onClickPawn(pawn: Pawn): void {
-    console.log(
-      `%cBijoya app.component.ts[ln:19] onClickPawn`,
-      'color: deeppink'
-    );
-    // this.game.currentPlayerMovePawn(pawn);
+  public onRollButtonClick(): void {
+    this.firstPlayerDeterminer.currentPlayerRollDice();
   }
 }

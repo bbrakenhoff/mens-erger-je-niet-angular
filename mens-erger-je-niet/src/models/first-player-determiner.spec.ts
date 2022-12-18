@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
+import { Dice } from './dice';
 import { FirstPlayerDeterminer } from './first-player-determiner';
 import { Player } from './player';
 import { Turn } from './turn';
@@ -7,27 +9,55 @@ import { Turn } from './turn';
 type PlayerSpy = {
   player: Player;
   turn$$: BehaviorSubject<Turn | undefined>;
-  rollDice: (diceRoll: number) => void;
+  rollDice: jasmine.Spy<(dice: Dice) => void>;
+  startTurn: jasmine.Spy<() => void>;
+  endTurn: jasmine.Spy<() => void>;
 };
 
 function createPlayerSpy(): PlayerSpy {
   const turn$$ = new BehaviorSubject<Turn | undefined>(undefined);
-
-  return {
+  const player = new Player();
+  (player['turn$'] as any) = turn$$;
+  const playerSpy: PlayerSpy = {
+    player,
     turn$$,
-    player: jasmine.createSpyObj<Player>('Player', [], {
-      turn$: turn$$.asObservable(),
-    }),
-    rollDice: (diceRoll: number): void => {
-      turn$$.next({ diceRoll: -1, isPlayerPuttingPawnOnStartField: false });
-      turn$$.next({ diceRoll, isPlayerPuttingPawnOnStartField: false });
-      turn$$.next(undefined);
-    },
+    rollDice: spyOn(player, 'rollDice'),
+    startTurn: spyOn(player, 'startTurn'),
+    endTurn: spyOn(player, 'endTurn'),
   };
+
+  playerSpy.rollDice.and.callFake((dice) => {
+    turn$$.next({
+      diceRoll: dice.roll(),
+      isPlayerPuttingPawnOnStartField: false,
+    });
+  });
+
+  playerSpy.startTurn.and.callFake(() =>
+    turn$$.next({
+      diceRoll: -1,
+      isPlayerPuttingPawnOnStartField: false,
+    })
+  );
+
+  playerSpy.endTurn.and.callFake(() => turn$$.next(undefined));
+
+  return playerSpy;
 }
 
-describe('FirstPlayerDeterminer', () => {
+type DiceSpy = {
+  dice: Dice;
+  roll: jasmine.Spy<() => number>;
+};
+
+function createDiceSpy(): DiceSpy {
+  const dice = new Dice();
+  return { dice, roll: spyOn(dice, 'roll') };
+}
+
+fdescribe('FirstPlayerDeterminer', () => {
   let playerSpies: PlayerSpy[];
+  let diceSpy: DiceSpy;
   let firstPlayerDeterminer: FirstPlayerDeterminer;
 
   let testScheduler: TestScheduler;
@@ -39,8 +69,10 @@ describe('FirstPlayerDeterminer', () => {
       createPlayerSpy(),
       createPlayerSpy(),
     ];
+    diceSpy = createDiceSpy();
     firstPlayerDeterminer = new FirstPlayerDeterminer(
-      playerSpies.map((spy) => spy.player)
+      playerSpies.map((playerSpy) => playerSpy.player),
+      diceSpy.dice
     );
 
     testScheduler = new TestScheduler((actual, expected) => {
@@ -48,8 +80,8 @@ describe('FirstPlayerDeterminer', () => {
     });
   });
 
-  describe('determineFirstPlayer(players, currentPlayerIndex)', () => {
-    it('should return -1 when none of the players rolled the dice yet', () => {
+  describe('currentPlayerRollDice()', () => {
+    it('should emit -1 when none of the players rolled the dice yet', () => {
       testScheduler.run(({ expectObservable }) => {
         expectObservable(firstPlayerDeterminer.firstPlayerIndex$).toBe('a', {
           a: -1,
@@ -57,14 +89,26 @@ describe('FirstPlayerDeterminer', () => {
       });
     });
 
-    it('should return -1 when not all players have rolled the dice yet', () => {
+    it('should let the current player roll the dice', () => {
+      firstPlayerDeterminer.currentPlayerRollDice();
+      expect(playerSpies[0].rollDice).toHaveBeenCalledWith(diceSpy.dice);
+      expect(diceSpy.roll).toHaveBeenCalled();
+    });
+
+    it('should emit -1 when not all players have rolled the dice yet', () => {
       testScheduler.run(({ expectObservable }) => {
+        diceSpy.roll.and.returnValues(3, 4, 5);
+
         const replaySubject$$ = new ReplaySubject<number>();
         firstPlayerDeterminer.firstPlayerIndex$.subscribe(replaySubject$$);
 
-        playerSpies[0].rollDice(3);
-        playerSpies[1].rollDice(4);
-        playerSpies[2].rollDice(5);
+        firstPlayerDeterminer.currentPlayerRollDice();
+        firstPlayerDeterminer.currentPlayerRollDice();
+        firstPlayerDeterminer.currentPlayerRollDice();
+
+        expect(playerSpies[0].rollDice).toHaveBeenCalledWith(diceSpy.dice);
+        expect(playerSpies[1].rollDice).toHaveBeenCalledWith(diceSpy.dice);
+        expect(playerSpies[2].rollDice).toHaveBeenCalledWith(diceSpy.dice);
 
         expectObservable(replaySubject$$).toBe('(a)', {
           a: -1,
@@ -72,15 +116,22 @@ describe('FirstPlayerDeterminer', () => {
       });
     });
 
-    it('should return -1 when first player not determined and multiple players have the highest dice roll', () => {
+    it('should emit -1 when first player not determined and multiple players have the highest dice roll', () => {
       testScheduler.run(({ expectObservable }) => {
+        diceSpy.roll.and.returnValues(3, 4, 5, 5);
+
         const replaySubject$$ = new ReplaySubject<number>();
         firstPlayerDeterminer.firstPlayerIndex$.subscribe(replaySubject$$);
 
-        playerSpies[0].rollDice(3);
-        playerSpies[1].rollDice(4);
-        playerSpies[2].rollDice(5);
-        playerSpies[3].rollDice(5);
+        firstPlayerDeterminer.currentPlayerRollDice();
+        firstPlayerDeterminer.currentPlayerRollDice();
+        firstPlayerDeterminer.currentPlayerRollDice();
+        firstPlayerDeterminer.currentPlayerRollDice();
+
+        expect(playerSpies[0].rollDice).toHaveBeenCalledWith(diceSpy.dice);
+        expect(playerSpies[1].rollDice).toHaveBeenCalledWith(diceSpy.dice);
+        expect(playerSpies[2].rollDice).toHaveBeenCalledWith(diceSpy.dice);
+        expect(playerSpies[3].rollDice).toHaveBeenCalledWith(diceSpy.dice);
 
         expectObservable(replaySubject$$).toBe('(abc)', {
           a: -1,
@@ -90,15 +141,24 @@ describe('FirstPlayerDeterminer', () => {
       });
     });
 
-    it('should return index of first player when first player determined', () => {
+    it('should emit index of first player when first player determined', () => {
       testScheduler.run(({ expectObservable }) => {
+        diceSpy.roll.and.returnValues(3, 4, 6, 5);
+
         const replaySubject$$ = new ReplaySubject<number>();
         firstPlayerDeterminer.firstPlayerIndex$.subscribe(replaySubject$$);
 
-        playerSpies[0].rollDice(3);
-        playerSpies[1].rollDice(4);
-        playerSpies[2].rollDice(6);
-        playerSpies[3].rollDice(5);
+        firstPlayerDeterminer.currentPlayerRollDice();
+        firstPlayerDeterminer.currentPlayerRollDice();
+        firstPlayerDeterminer.currentPlayerRollDice();
+        firstPlayerDeterminer.currentPlayerRollDice();
+
+        expect(playerSpies[0].rollDice).toHaveBeenCalledWith(diceSpy.dice);
+        expect(playerSpies[1].rollDice).toHaveBeenCalledWith(diceSpy.dice);
+        expect(playerSpies[2].rollDice).toHaveBeenCalledWith(diceSpy.dice);
+        expect(playerSpies[3].rollDice).toHaveBeenCalledWith(diceSpy.dice);
+
+        expect(diceSpy.roll).toHaveBeenCalledTimes(4);
 
         expectObservable(replaySubject$$).toBe('(abc|)', {
           a: -1,
@@ -108,20 +168,24 @@ describe('FirstPlayerDeterminer', () => {
       });
     });
 
-    it('should return the index of the first player when first player already determined', () => {
+    it('should emit the index of the first player when first player already determined', () => {
       testScheduler.run(({ expectObservable }) => {
+        diceSpy.roll.and.returnValues(3, 4, 6, 5, 4, 3, 2, 1);
+
         const replaySubject$$ = new ReplaySubject<number>();
         firstPlayerDeterminer.firstPlayerIndex$.subscribe(replaySubject$$);
 
-        playerSpies[0].rollDice(3);
-        playerSpies[1].rollDice(4);
-        playerSpies[2].rollDice(6);
-        playerSpies[3].rollDice(5);
+        firstPlayerDeterminer.currentPlayerRollDice();
+        firstPlayerDeterminer.currentPlayerRollDice();
+        firstPlayerDeterminer.currentPlayerRollDice();
+        firstPlayerDeterminer.currentPlayerRollDice();
 
-        playerSpies[0].rollDice(4);
-        playerSpies[1].rollDice(3);
-        playerSpies[2].rollDice(2);
-        playerSpies[3].rollDice(1);
+        expect(playerSpies[0].rollDice).toHaveBeenCalledWith(diceSpy.dice);
+        expect(playerSpies[1].rollDice).toHaveBeenCalledWith(diceSpy.dice);
+        expect(playerSpies[2].rollDice).toHaveBeenCalledWith(diceSpy.dice);
+        expect(playerSpies[3].rollDice).toHaveBeenCalledWith(diceSpy.dice);
+
+       
 
         expectObservable(replaySubject$$).toBe('(abc|)', {
           a: -1,

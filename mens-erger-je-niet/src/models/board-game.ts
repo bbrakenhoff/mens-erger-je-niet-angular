@@ -1,22 +1,70 @@
+import {
+  BehaviorSubject,
+  combineLatest,
+  map,
+  Observable,
+  of,
+  switchMap,
+} from 'rxjs';
 import { Board } from './board';
 import { allColors } from './color';
 import { Dice } from './dice';
 import { Pawn } from './pawn';
 import { Player } from './player';
+import { Turn } from './turn';
 
 export class BoardGame {
+  private readonly _currentPlayerIndex$$ = new BehaviorSubject(-1);
+  public readonly currentPlayerIndex$$ =
+    this._currentPlayerIndex$$.asObservable();
+  public readonly currentPlayerTurn$ = this.currentPlayerIndex$$.pipe(
+    switchMap((currentPlayerIndex) =>
+      this.combineCurrentPlayerIndexWithTurn$(currentPlayerIndex)
+    )
+  );
+
   public constructor(
+    firstPlayerIndex: number,
     public readonly players: readonly Player[] = [
       new Player(),
       new Player(),
       new Player(),
       new Player(),
     ],
-    private readonly firstPlayerIndex: number,
     private readonly dice = new Dice(),
     public readonly board = new Board()
   ) {
     this.letPlayersPutPawnsOnHomeFields();
+    this.nextTurn(firstPlayerIndex);
+  }
+
+  private combineCurrentPlayerIndexWithTurn$(
+    currentPlayerIndex: number
+  ): Observable<{ playerIndex: number; turn: Turn | undefined }> {
+    return combineLatest([
+      of(currentPlayerIndex),
+      this.currentPlayer.turn$,
+    ]).pipe(
+      map(([playerIndex, turn]) => ({
+        playerIndex,
+        turn,
+      }))
+    );
+  }
+
+  private get currentPlayer(): Player {
+    return this.players[this._currentPlayerIndex$$.value];
+  }
+
+  private letPlayersPutPawnsOnHomeFields(): void {
+    const allPawnsInGame: readonly Pawn[][] = BoardGame.createPawns();
+    allPawnsInGame.forEach((pawns: Pawn[], i) => {
+      const matchingHomeFields = this.board.getFieldGroupByColor(
+        pawns[0].color
+      ).homeFields;
+      this.players[i].pawns.push(...pawns);
+      this.players[i].putPawnsOnHomeFields(matchingHomeFields);
+    });
   }
 
   private static createPawns(): readonly Pawn[][] {
@@ -32,76 +80,16 @@ export class BoardGame {
     return allPawnsInGame;
   }
 
-  private letPlayersPutPawnsOnHomeFields(): void {
-    const allPawnsInGame: readonly Pawn[][] = BoardGame.createPawns();
-    allPawnsInGame.forEach((pawns: Pawn[], i) => {
-      const matchingHomeFields = this.board.getFieldGroupByColor(
-        pawns[0].color
-      ).homeFields;
-      this.players[i].pawns.push(...pawns);
-      this.players[i].putPawnsOnHomeFields(matchingHomeFields);
-    });
+  private nextTurn(playerIndex: number = this.getNextPlayerIndex()): void {
+    this._currentPlayerIndex$$.next(playerIndex);
+    this.currentPlayer.startTurn();
   }
 
-  // private nextPlayerIndex(): number {
-  //   return this.currentPlayerIndex + 1 === 4 ? 0 : this.currentPlayerIndex + 1;
-  // }
+  private getNextPlayerIndex(): number {
+    return 1;
+  }
 
-  // public currentPlayerRollDice(): void {
-  //   console.log(`Bijoya game.ts[ln:142] currentPlayerRollDice()`);
-  //   this.currentPlayer.rollDice(this.dice);
-  // }
-
-  // private onFirstPlayerDeterminerUpdate(firstPlayerIndex: number): void {
-  //   this.isDeterminingFirstPlayer = firstPlayerIndex === -1;
-
-  //   return this.isDeterminingFirstPlayer
-  //     ? this.nextTurn()
-  //     : this.nextTurn(firstPlayerIndex);
-  // }
-
-  // private nextTurn(playerIndex: number = this.nextPlayerIndex()): void {
-  //   console.log(`Bijoya game.ts[ln:160] nextTurn`, playerIndex);
-  //   this._currentPlayerIndex = playerIndex;
-  // }
-
-  // private onTurnUpdated(turn?: Turn): void {
-  //   console.log(`Bijoya game.ts[ln:135] onTurnUpdated()`, turn);
-  //   if (!this.isDeterminingFirstPlayer && turn) {
-  //     return this.letPlayerExecuteActionFollowingDiceRoll();
-  //   }
-  // }
-
-  // public letPlayerExecuteActionFollowingDiceRoll(): void {
-  //   console.log(
-  //     `Bijoya game.ts[ln:153] letPlayerExecuteActionFollowingDiceRoll()`
-  //   );
-  //   switch (this.diceRollActionDeterminer.determineAction(this.currentPlayer)) {
-  //     case DiceRollAction.MovePawnToStart:
-  //       this.currentPlayerMovePawnToStartField();
-  //       break;
-  //     case DiceRollAction.MovePawnFromStart:
-  //       this.currentPlayerMovePawnFromStartField();
-  //       break;
-  //     case DiceRollAction.DoNothing:
-  //       this.nextTurn();
-  //       break;
-  //   }
-  // }
-
-  // private currentPlayerMovePawnToStartField(): void {
-  //   this.currentPlayer.movePawnToStartField();
-  // }
-
-  // private currentPlayerMovePawnFromStartField(): void {
-  //   this.currentPlayer.movePawnFromStartField();
-  //   this.nextTurn();
-  // }
-
-  // public currentPlayerMovePawn(pawn: Pawn): void {
-  //   if (this.currentPlayer.turn$) {
-  //     this.currentPlayer.movePawn(pawn);
-  //     this.nextTurn();
-  //   }
-  // }
+  public currentPlayerRollDice(): void {
+    this.currentPlayer.rollDice(this.dice);
+  }
 }
