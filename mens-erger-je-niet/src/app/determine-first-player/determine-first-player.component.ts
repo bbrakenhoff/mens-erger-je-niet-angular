@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { DetermineFirstPlayerService } from './determine-first-player.service';
 
 @Component({
@@ -8,18 +8,23 @@ import { DetermineFirstPlayerService } from './determine-first-player.service';
   styleUrls: ['./determine-first-player.component.scss'],
 })
 export class DetermineFirstPlayerComponent {
-  public readonly diceRoll$: Observable<{
-    playerIndex: number;
-    diceRoll: number;
-  }> = this.determineFirstPlayerService.currentPlayerDiceRoll$;
+  public readonly diceRolls$ = this.determineFirstPlayerService.diceRolls$;
   public readonly firstPlayerIndex$: Observable<number> =
-    this.determineFirstPlayerService.firstPlayerIndex$;
+    this.determineFirstPlayerService.firstPlayerIndex$.pipe(
+      tap((t) =>
+        console.log(
+          `%c🐝 determine-first-player.component.ts[ln:13] tap first player`,
+          'color: limegreen',
+          t
+        )
+      )
+    );
 
   public constructor(
     private readonly determineFirstPlayerService: DetermineFirstPlayerService
   ) {}
 
-  public onRollButtonClick(): void {
+  public onClickRollDiceButton(): void {
     this.determineFirstPlayerService.currentPlayerRollDice();
   }
 }

@@ -93,18 +93,39 @@ fdescribe('DetermineFirstPlayerService', () => {
   });
 
   describe('currentPlayerRollDice()', () => {
+    it('should let the players roll the dice', () => {
+      sut.currentPlayerRollDice();
+      sut.currentPlayerRollDice();
+      sut.currentPlayerRollDice();
+      sut.currentPlayerRollDice();
+
+      expect(playerSpies[0].endTurn).not.toHaveBeenCalled();
+      expect(playerSpies[0].rollDice).toHaveBeenCalledWith(diceSpy.dice);
+      expect(playerSpies[0].startTurn).toHaveBeenCalled();
+
+      expect(playerSpies[1].endTurn).toHaveBeenCalled();
+      expect(playerSpies[1].rollDice).toHaveBeenCalledWith(diceSpy.dice);
+      expect(playerSpies[1].startTurn).toHaveBeenCalled();
+
+      expect(playerSpies[2].endTurn).toHaveBeenCalled();
+      expect(playerSpies[2].rollDice).toHaveBeenCalledWith(diceSpy.dice);
+      expect(playerSpies[2].startTurn).toHaveBeenCalled();
+
+      expect(playerSpies[3].endTurn).toHaveBeenCalled();
+      expect(playerSpies[3].rollDice).toHaveBeenCalledWith(diceSpy.dice);
+      expect(playerSpies[3].startTurn).toHaveBeenCalled();
+
+      expect(diceSpy.roll).toHaveBeenCalled();
+    });
+  });
+
+  describe('firstPlayerIndex$', () => {
     it('should emit -1 when none of the players rolled the dice yet', () => {
       testScheduler.run(({ expectObservable }) => {
         expectObservable(sut.firstPlayerIndex$).toBe('a', {
           a: -1,
         });
       });
-    });
-
-    it('should let the current player roll the dice', () => {
-      sut.currentPlayerRollDice();
-      expect(playerSpies[0].rollDice).toHaveBeenCalledWith(diceSpy.dice);
-      expect(diceSpy.roll).toHaveBeenCalled();
     });
 
     it('should emit -1 when not all players have rolled the dice yet', () => {
@@ -117,10 +138,6 @@ fdescribe('DetermineFirstPlayerService', () => {
         sut.currentPlayerRollDice();
         sut.currentPlayerRollDice();
         sut.currentPlayerRollDice();
-
-        expect(playerSpies[0].rollDice).toHaveBeenCalledWith(diceSpy.dice);
-        expect(playerSpies[1].rollDice).toHaveBeenCalledWith(diceSpy.dice);
-        expect(playerSpies[2].rollDice).toHaveBeenCalledWith(diceSpy.dice);
 
         expectObservable(replaySubject$$).toBe('(a)', {
           a: -1,
@@ -139,11 +156,6 @@ fdescribe('DetermineFirstPlayerService', () => {
         sut.currentPlayerRollDice();
         sut.currentPlayerRollDice();
         sut.currentPlayerRollDice();
-
-        expect(playerSpies[0].rollDice).toHaveBeenCalledWith(diceSpy.dice);
-        expect(playerSpies[1].rollDice).toHaveBeenCalledWith(diceSpy.dice);
-        expect(playerSpies[2].rollDice).toHaveBeenCalledWith(diceSpy.dice);
-        expect(playerSpies[3].rollDice).toHaveBeenCalledWith(diceSpy.dice);
 
         expectObservable(replaySubject$$).toBe('(abc)', {
           a: -1,
@@ -164,11 +176,6 @@ fdescribe('DetermineFirstPlayerService', () => {
         sut.currentPlayerRollDice();
         sut.currentPlayerRollDice();
         sut.currentPlayerRollDice();
-
-        expect(playerSpies[0].rollDice).toHaveBeenCalledWith(diceSpy.dice);
-        expect(playerSpies[1].rollDice).toHaveBeenCalledWith(diceSpy.dice);
-        expect(playerSpies[2].rollDice).toHaveBeenCalledWith(diceSpy.dice);
-        expect(playerSpies[3].rollDice).toHaveBeenCalledWith(diceSpy.dice);
 
         expect(diceSpy.roll).toHaveBeenCalledTimes(4);
 
@@ -192,16 +199,110 @@ fdescribe('DetermineFirstPlayerService', () => {
         sut.currentPlayerRollDice();
         sut.currentPlayerRollDice();
 
-        expect(playerSpies[0].rollDice).toHaveBeenCalledWith(diceSpy.dice);
-        expect(playerSpies[1].rollDice).toHaveBeenCalledWith(diceSpy.dice);
-        expect(playerSpies[2].rollDice).toHaveBeenCalledWith(diceSpy.dice);
-        expect(playerSpies[3].rollDice).toHaveBeenCalledWith(diceSpy.dice);
-
         expectObservable(replaySubject$$).toBe('(abc|)', {
           a: -1,
           b: -1,
           c: 2,
           d: -1,
+        });
+      });
+    });
+  });
+
+  fdescribe('diceRolls$', () => {
+    it('should emit -1 when not all players have rolled the dice yet', () => {
+      testScheduler.run(({ expectObservable }) => {
+        diceSpy.roll.and.returnValues(3, 4, 5);
+
+        const replaySubject$$ = new ReplaySubject<
+          {
+            playerIndex: number;
+            diceRoll: number;
+          }[]
+        >();
+        sut.diceRolls$.subscribe(replaySubject$$);
+
+        sut.currentPlayerRollDice();
+        sut.currentPlayerRollDice();
+        sut.currentPlayerRollDice();
+
+        expectObservable(replaySubject$$).toBe('(abcd)', {
+          a: [
+            { playerIndex: 0, diceRoll: -1 },
+            { playerIndex: 1, diceRoll: -1 },
+            { playerIndex: 2, diceRoll: -1 },
+            { playerIndex: 3, diceRoll: -1 },
+          ],
+          b: [
+            { playerIndex: 0, diceRoll: 3 },
+            { playerIndex: 1, diceRoll: -1 },
+            { playerIndex: 2, diceRoll: -1 },
+            { playerIndex: 3, diceRoll: -1 },
+          ],
+          c: [
+            { playerIndex: 0, diceRoll: 3 },
+            { playerIndex: 1, diceRoll: 4 },
+            { playerIndex: 2, diceRoll: -1 },
+            { playerIndex: 3, diceRoll: -1 },
+          ],
+          d: [
+            { playerIndex: 0, diceRoll: 3 },
+            { playerIndex: 1, diceRoll: 4 },
+            { playerIndex: 2, diceRoll: 5 },
+            { playerIndex: 3, diceRoll: -1 },
+          ],
+        });
+      });
+    });
+
+    it('should emit index of first player when first player determined', () => {
+      testScheduler.run(({ expectObservable }) => {
+        diceSpy.roll.and.returnValues(3, 4, 6, 5);
+
+        const replaySubject$$ = new ReplaySubject<
+          {
+            playerIndex: number;
+            diceRoll: number;
+          }[]
+        >();
+        sut.diceRolls$.subscribe(replaySubject$$);
+
+        sut.currentPlayerRollDice();
+        sut.currentPlayerRollDice();
+        sut.currentPlayerRollDice();
+        sut.currentPlayerRollDice();
+
+        expectObservable(replaySubject$$).toBe('(abcde)', {
+          a: [
+            { playerIndex: 0, diceRoll: -1 },
+            { playerIndex: 1, diceRoll: -1 },
+            { playerIndex: 2, diceRoll: -1 },
+            { playerIndex: 3, diceRoll: -1 },
+          ],
+          b: [
+            { playerIndex: 0, diceRoll: 3 },
+            { playerIndex: 1, diceRoll: -1 },
+            { playerIndex: 2, diceRoll: -1 },
+            { playerIndex: 3, diceRoll: -1 },
+          ],
+          c: [
+            { playerIndex: 0, diceRoll: 3 },
+            { playerIndex: 1, diceRoll: 4 },
+            { playerIndex: 2, diceRoll: -1 },
+            { playerIndex: 3, diceRoll: -1 },
+          ],
+          d: [
+            { playerIndex: 0, diceRoll: 3 },
+            { playerIndex: 1, diceRoll: 4 },
+            { playerIndex: 2, diceRoll: 6 },
+            { playerIndex: 3, diceRoll: -1 },
+          ],
+          e: [
+            { playerIndex: 0, diceRoll: 3 },
+            { playerIndex: 1, diceRoll: 4 },
+            { playerIndex: 2, diceRoll: 6 },
+            { playerIndex: 3, diceRoll: 5 },
+          ],
         });
       });
     });

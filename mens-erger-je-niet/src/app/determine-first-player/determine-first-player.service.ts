@@ -8,34 +8,49 @@ import {
   filter,
   map,
   Observable,
-  of,
-  skip,
+  pairwise,
   startWith,
-  switchMap,
-  takeWhile,
-  tap,
+  takeWhile
 } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class DetermineFirstPlayerService {
-  public readonly firstPlayerIndex$: Observable<number>;
+  public readonly firstPlayerIndex$ = combineLatest(
+    this.mapPlayersToDiceRolls()
+  ).pipe(
+    takeWhile(
+      (diceRolls: number[]) => !this.isAbleToDetermineFirstPlayer(diceRolls),
+      true
+    ),
+    map((diceRolls: number[]) => {
+      return this.isAbleToDetermineFirstPlayer(diceRolls)
+        ? this.determineFirstPlayerIndex(diceRolls)
+        : -1;
+    }),
+    startWith(-1)
+  );
 
   private readonly _currentPlayerIndex$$ = new BehaviorSubject(-1);
   public readonly currentPlayerIndex$ =
     this._currentPlayerIndex$$.asObservable();
 
-  public readonly currentPlayerDiceRoll$ = this.currentPlayerIndex$.pipe(
-    skip(1),
-    switchMap((currentPlayerIndex) =>
-      combineLatest([of(currentPlayerIndex), this.currentPlayer.turn$])
+  public readonly diceRolls$ = combineLatest(
+    this.mapPlayersToDiceRollsPairwise()
+  ).pipe(
+    map((diceRolls) =>
+      diceRolls.map((diceRoll, playerIndex) => ({
+        playerIndex,
+        diceRoll,
+      }))
     ),
-    tap((r) =>
-      console.log(`🐝 first-player-determiner.ts[ln:30] tap tap tap`, r)
+    pairwise(),
+    filter(
+      ([previous, current]) =>
+        this.somePlayerRolledDice(previous, current) ||
+        this.noPlayersRolledDice(previous, current)
     ),
-    map(([playerIndex, turn]) => ({
-      playerIndex,
-      diceRoll: turn ? turn.diceRoll : -1,
-    }))
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    map(([previous, current]) => current)
   );
 
   public constructor(
@@ -43,31 +58,38 @@ export class DetermineFirstPlayerService {
     private readonly players: readonly Player[],
     @Inject('Dice')
     private readonly dice: Dice
-  ) {
-    this.firstPlayerIndex$ = combineLatest(
-      this.mapPlayersToDiceRolls(players)
-    ).pipe(
-      takeWhile(
-        (diceRolls: number[]) => !this.isAbleToDetermineFirstPlayer(diceRolls),
-        true
-      ),
-      map((diceRolls: number[]) => {
-        return this.isAbleToDetermineFirstPlayer(diceRolls)
-          ? this.determineFirstPlayerIndex(diceRolls)
-          : -1;
-      }),
-      startWith(-1)
+  ) {}
+
+  private noPlayersRolledDice(
+    previous: { playerIndex: number; diceRoll: number }[],
+    current: { playerIndex: number; diceRoll: number }[]
+  ): boolean {
+    return (
+      previous.every((diceRoll) => diceRoll.diceRoll === -1) &&
+      current.every((diceRoll) => diceRoll.diceRoll === -1)
     );
+  }
+
+  /**
+   * Check if any of the players have rolled the dice,
+   * make sure to exclude start and end turn
+   * @param previous
+   * @param current
+   * @returns
+   */
+  private somePlayerRolledDice(
+    previous: { playerIndex: number; diceRoll: number }[],
+    current: { playerIndex: number; diceRoll: number }[]
+  ): boolean {
+    return JSON.stringify(previous) !== JSON.stringify(current);
   }
 
   private get currentPlayer(): Player {
     return this.players[this._currentPlayerIndex$$.value];
   }
 
-  private mapPlayersToDiceRolls(
-    players: readonly Player[]
-  ): readonly Observable<number>[] {
-    return players.map((player) =>
+  private mapPlayersToDiceRolls(): readonly Observable<number>[] {
+    return this.players.map((player) =>
       player.turn$.pipe(
         filter((turn) => !!turn),
         map((turn?: Turn) => turn as Turn), // Is not optional anymore after filtering
@@ -121,5 +143,27 @@ export class DetermineFirstPlayerService {
     }
 
     return nextPlayerIndex;
+  }
+
+  private mapPlayersToDiceRollsPairwise(): Observable<number>[] {
+    return this.players.map((player) =>
+      player.turn$.pipe(
+        map((turn: Turn | undefined) => (turn ? turn.diceRoll : -1)),
+        startWith(-1),
+        pairwise(),
+        map(([previousDiceRoll, currentDiceRoll]) =>
+          this.rememberDiceRoll(previousDiceRoll, currentDiceRoll)
+            ? previousDiceRoll
+            : currentDiceRoll
+        )
+      )
+    );
+  }
+
+  private rememberDiceRoll(
+    previousDiceRoll: number,
+    currentDiceRoll: number
+  ): boolean {
+    return previousDiceRoll > -1 && currentDiceRoll === -1;
   }
 }
