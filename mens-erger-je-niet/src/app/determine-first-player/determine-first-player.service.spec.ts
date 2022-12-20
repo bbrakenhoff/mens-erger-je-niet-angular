@@ -210,54 +210,9 @@ fdescribe('DetermineFirstPlayerService', () => {
   });
 
   fdescribe('diceRolls$', () => {
-    it('should emit -1 when not all players have rolled the dice yet', () => {
-      testScheduler.run(({ expectObservable }) => {
-        diceSpy.roll.and.returnValues(3, 4, 5);
-
-        const replaySubject$$ = new ReplaySubject<
-          {
-            playerIndex: number;
-            diceRoll: number;
-          }[]
-        >();
-        sut.diceRolls$.subscribe(replaySubject$$);
-
-        sut.currentPlayerRollDice();
-        sut.currentPlayerRollDice();
-        sut.currentPlayerRollDice();
-
-        expectObservable(replaySubject$$).toBe('(abcd)', {
-          a: [
-            { playerIndex: 0, diceRoll: -1 },
-            { playerIndex: 1, diceRoll: -1 },
-            { playerIndex: 2, diceRoll: -1 },
-            { playerIndex: 3, diceRoll: -1 },
-          ],
-          b: [
-            { playerIndex: 0, diceRoll: 3 },
-            { playerIndex: 1, diceRoll: -1 },
-            { playerIndex: 2, diceRoll: -1 },
-            { playerIndex: 3, diceRoll: -1 },
-          ],
-          c: [
-            { playerIndex: 0, diceRoll: 3 },
-            { playerIndex: 1, diceRoll: 4 },
-            { playerIndex: 2, diceRoll: -1 },
-            { playerIndex: 3, diceRoll: -1 },
-          ],
-          d: [
-            { playerIndex: 0, diceRoll: 3 },
-            { playerIndex: 1, diceRoll: 4 },
-            { playerIndex: 2, diceRoll: 5 },
-            { playerIndex: 3, diceRoll: -1 },
-          ],
-        });
-      });
-    });
-
     it('should emit index of first player when first player determined', () => {
       testScheduler.run(({ expectObservable }) => {
-        diceSpy.roll.and.returnValues(3, 4, 6, 5);
+        diceSpy.roll.and.returnValues(3, 4, 4, 5, 4, 3, 2, 1);
 
         const replaySubject$$ = new ReplaySubject<
           {
@@ -271,8 +226,13 @@ fdescribe('DetermineFirstPlayerService', () => {
         sut.currentPlayerRollDice();
         sut.currentPlayerRollDice();
         sut.currentPlayerRollDice();
+        
+        sut.currentPlayerRollDice();
+        sut.currentPlayerRollDice();
+        sut.currentPlayerRollDice();
+        sut.currentPlayerRollDice();
 
-        expectObservable(replaySubject$$).toBe('(abcde)', {
+        expectObservable(replaySubject$$).toBe('(abcdefghij)', {
           a: [
             { playerIndex: 0, diceRoll: -1 },
             { playerIndex: 1, diceRoll: -1 },
@@ -298,6 +258,36 @@ fdescribe('DetermineFirstPlayerService', () => {
             { playerIndex: 3, diceRoll: -1 },
           ],
           e: [
+            { playerIndex: 0, diceRoll: 3 },
+            { playerIndex: 1, diceRoll: 4 },
+            { playerIndex: 2, diceRoll: 6 },
+            { playerIndex: 3, diceRoll: 5 },
+          ],
+          f: [
+            { playerIndex: 0, diceRoll: -1 },
+            { playerIndex: 1, diceRoll: -1 },
+            { playerIndex: 2, diceRoll: -1 },
+            { playerIndex: 3, diceRoll: -1 },
+          ],
+          g: [
+            { playerIndex: 0, diceRoll: 3 },
+            { playerIndex: 1, diceRoll: -1 },
+            { playerIndex: 2, diceRoll: -1 },
+            { playerIndex: 3, diceRoll: -1 },
+          ],
+          h: [
+            { playerIndex: 0, diceRoll: 3 },
+            { playerIndex: 1, diceRoll: 4 },
+            { playerIndex: 2, diceRoll: -1 },
+            { playerIndex: 3, diceRoll: -1 },
+          ],
+          i: [
+            { playerIndex: 0, diceRoll: 3 },
+            { playerIndex: 1, diceRoll: 4 },
+            { playerIndex: 2, diceRoll: 6 },
+            { playerIndex: 3, diceRoll: -1 },
+          ],
+          j: [
             { playerIndex: 0, diceRoll: 3 },
             { playerIndex: 1, diceRoll: 4 },
             { playerIndex: 2, diceRoll: 6 },

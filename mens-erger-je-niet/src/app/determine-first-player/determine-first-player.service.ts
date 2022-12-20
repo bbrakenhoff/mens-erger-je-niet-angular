@@ -10,7 +10,7 @@ import {
   Observable,
   pairwise,
   startWith,
-  takeWhile
+  takeWhile,
 } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -50,7 +50,16 @@ export class DetermineFirstPlayerService {
         this.noPlayersRolledDice(previous, current)
     ),
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    map(([previous, current]) => current)
+    map(([previous, current]) => {
+      const diceRollsOfPlayers = current.map((diceRoll) => diceRoll.diceRoll);
+      if (
+        this.didAllPlayersRollTheDice(diceRollsOfPlayers) &&
+        !this.isHighestDiceRollOnlyOnce(diceRollsOfPlayers)
+      ) {
+        current.forEach((diceRoll) => (diceRoll.diceRoll = -1));
+      }
+      return current;
+    })
   );
 
   public constructor(
