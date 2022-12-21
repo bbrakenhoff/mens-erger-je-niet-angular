@@ -212,7 +212,7 @@ fdescribe('DetermineFirstPlayerService', () => {
   fdescribe('diceRolls$', () => {
     it('should emit index of first player when first player determined', () => {
       testScheduler.run(({ expectObservable }) => {
-        diceSpy.roll.and.returnValues(3, 4, 4, 5, 4, 3, 2, 1);
+        diceSpy.roll.and.returnValues(3, 4, 4, 2, 6,5, 4, 1);
 
         const replaySubject$$ = new ReplaySubject<
           {
@@ -226,13 +226,13 @@ fdescribe('DetermineFirstPlayerService', () => {
         sut.currentPlayerRollDice();
         sut.currentPlayerRollDice();
         sut.currentPlayerRollDice();
-        
-        sut.currentPlayerRollDice();
-        sut.currentPlayerRollDice();
-        sut.currentPlayerRollDice();
-        sut.currentPlayerRollDice();
 
-        expectObservable(replaySubject$$).toBe('(abcdefghij)', {
+        // sut.currentPlayerRollDice();
+        // sut.currentPlayerRollDice();
+        // sut.currentPlayerRollDice();
+        // sut.currentPlayerRollDice();
+
+        expectObservable(replaySubject$$).toBe('(abcdef)', {
           a: [
             { playerIndex: 0, diceRoll: -1 },
             { playerIndex: 1, diceRoll: -1 },
@@ -254,14 +254,14 @@ fdescribe('DetermineFirstPlayerService', () => {
           d: [
             { playerIndex: 0, diceRoll: 3 },
             { playerIndex: 1, diceRoll: 4 },
-            { playerIndex: 2, diceRoll: 6 },
+            { playerIndex: 2, diceRoll: 4 },
             { playerIndex: 3, diceRoll: -1 },
           ],
           e: [
             { playerIndex: 0, diceRoll: 3 },
             { playerIndex: 1, diceRoll: 4 },
-            { playerIndex: 2, diceRoll: 6 },
-            { playerIndex: 3, diceRoll: 5 },
+            { playerIndex: 2, diceRoll: 4 },
+            { playerIndex: 3, diceRoll: 2 },
           ],
           f: [
             { playerIndex: 0, diceRoll: -1 },
@@ -270,28 +270,28 @@ fdescribe('DetermineFirstPlayerService', () => {
             { playerIndex: 3, diceRoll: -1 },
           ],
           g: [
-            { playerIndex: 0, diceRoll: 3 },
+            { playerIndex: 0, diceRoll: 4 },
             { playerIndex: 1, diceRoll: -1 },
             { playerIndex: 2, diceRoll: -1 },
             { playerIndex: 3, diceRoll: -1 },
           ],
           h: [
-            { playerIndex: 0, diceRoll: 3 },
-            { playerIndex: 1, diceRoll: 4 },
+            { playerIndex: 0, diceRoll: 4 },
+            { playerIndex: 1, diceRoll: 3 },
             { playerIndex: 2, diceRoll: -1 },
             { playerIndex: 3, diceRoll: -1 },
           ],
           i: [
-            { playerIndex: 0, diceRoll: 3 },
-            { playerIndex: 1, diceRoll: 4 },
-            { playerIndex: 2, diceRoll: 6 },
+            { playerIndex: 0, diceRoll: 4 },
+            { playerIndex: 1, diceRoll: 3 },
+            { playerIndex: 2, diceRoll: 2 },
             { playerIndex: 3, diceRoll: -1 },
           ],
           j: [
-            { playerIndex: 0, diceRoll: 3 },
-            { playerIndex: 1, diceRoll: 4 },
-            { playerIndex: 2, diceRoll: 6 },
-            { playerIndex: 3, diceRoll: 5 },
+            { playerIndex: 0, diceRoll: 4 },
+            { playerIndex: 1, diceRoll: 3 },
+            { playerIndex: 2, diceRoll: 2 },
+            { playerIndex: 3, diceRoll: 1 },
           ],
         });
       });

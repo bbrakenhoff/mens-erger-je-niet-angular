@@ -11,6 +11,7 @@ import {
   pairwise,
   startWith,
   takeWhile,
+  tap,
 } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -50,15 +51,16 @@ export class DetermineFirstPlayerService {
         this.noPlayersRolledDice(previous, current)
     ),
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    map(([previous, current]) => {
-      const diceRollsOfPlayers = current.map((diceRoll) => diceRoll.diceRoll);
+    map(([previous, current]) => current),
+    tap((diceRollsOfPlayers) => {
       if (
-        this.didAllPlayersRollTheDice(diceRollsOfPlayers) &&
-        !this.isHighestDiceRollOnlyOnce(diceRollsOfPlayers)
+        this.duplicateHighestDiceRoll(
+          diceRollsOfPlayers.map((player) => player.diceRoll)
+        )
       ) {
-        current.forEach((diceRoll) => (diceRoll.diceRoll = -1));
+        console.log(`🐝 determine-first-player.service.ts[ln:61] tap duplicate`)
+        this.players.forEach((player) => player.endTurn());
       }
-      return current;
     })
   );
 
@@ -68,6 +70,13 @@ export class DetermineFirstPlayerService {
     @Inject('Dice')
     private readonly dice: Dice
   ) {}
+
+  private duplicateHighestDiceRoll(diceRollsOfPlayers: number[]) {
+    return (
+      this.didAllPlayersRollTheDice(diceRollsOfPlayers) &&
+      !this.isHighestDiceRollOnlyOnce(diceRollsOfPlayers)
+    );
+  }
 
   private noPlayersRolledDice(
     previous: { playerIndex: number; diceRoll: number }[],
@@ -161,7 +170,7 @@ export class DetermineFirstPlayerService {
         startWith(-1),
         pairwise(),
         map(([previousDiceRoll, currentDiceRoll]) =>
-          this.rememberDiceRoll(previousDiceRoll, currentDiceRoll)
+          this.alreadyRolledDice(previousDiceRoll, currentDiceRoll)
             ? previousDiceRoll
             : currentDiceRoll
         )
@@ -169,7 +178,7 @@ export class DetermineFirstPlayerService {
     );
   }
 
-  private rememberDiceRoll(
+  private alreadyRolledDice(
     previousDiceRoll: number,
     currentDiceRoll: number
   ): boolean {
